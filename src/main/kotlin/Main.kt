@@ -121,25 +121,3 @@ private fun deleteBlockWithRetries(client: NotionClient, block: Block, pageTitle
     }
 }
 
-
-/*
-/** Prepare page by deleting it if it exists and creating a new one */
-private fun preparePage(client: NotionClient, targetPage: String, pageTitle: String): Page {
-    logger.info("Deleting Page '$pageTitle' if exists")
-    deletePage(client, targetPage, pageTitle)
-    logger.info("Creating Page '$pageTitle'")
-    val page = createPage(client, targetPage, pageTitle)
-    logger.info("Created Page '$pageTitle' with id ${page.id}")
-    return page
-}
-
-private fun deletePage(client: NotionClient, targetPage: String, pageTitle: String) {
-    val children = client.retrieveBlockChildren(targetPage)
-    children.results
-        .filterIsInstance<ChildPageBlock>()
-        .filter { it.childPage.title == pageTitle }
-        .forEach {
-            client.deleteBlock(it.id!!)
-        }
-}
- */
