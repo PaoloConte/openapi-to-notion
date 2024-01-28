@@ -104,7 +104,12 @@ object NotionTemplate {
                                         cell(richText("Example"))
                                     }
                                     objectRows("", content.schema)
+                                }
 
+                                content.example?.let { example ->
+                                    toggle("Example") {
+                                        codeBlock(language = "json", content = example.toString().trim())
+                                    }
                                 }
                             }
                         }
@@ -135,7 +140,12 @@ object NotionTemplate {
                                             cell(richText("Example"))
                                         }
                                         objectRows("", content.schema)
+                                    }
 
+                                    content.example?.let { example ->
+                                        toggle("Example") {
+                                            codeBlock(language = "json", content = example.toString().trim())
+                                        }
                                     }
                                 }
                             }

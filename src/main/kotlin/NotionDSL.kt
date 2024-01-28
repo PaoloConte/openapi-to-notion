@@ -78,6 +78,24 @@ internal class BlocksBuilder {
         ))
     }
 
+    fun toggle(title: String, content: BlocksBuilder.() -> Unit) {
+        blocks.add(ToggleBlock(
+            toggle = ToggleBlock.Element(
+                richText = listOf(richText(title)),
+                children = BlocksBuilder().apply(content).build(),
+            )
+        ))
+    }
+
+    fun codeBlock(language: String, content: String) {
+        blocks.add(CodeBlock(
+            code = CodeBlock.Element(
+                richText = listOf(richText(content)),
+                language = language
+            )
+        ))
+    }
+
     fun richText(text: String) = RichText(text = Text(text))
 
     fun callout(vararg text: String, icon: String) {
