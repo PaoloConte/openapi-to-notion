@@ -13,88 +13,123 @@ import notion.api.v1.model.common.RichTextColor.*
 
 object NotionTemplate {
 
-    fun render(swagger: SwaggerParseResult, fileName: String): List<Block> {
-        return blocks {
+    fun render(swagger: SwaggerParseResult, fileName: String): List<Block> = blocks {
 
-            callout(
-                richText("This page is automatically generated from the OpenAPI specification.\n"),
-                richText("Do not edit!\n"),
-                richText("File: "), richText(fileName, code = true, color = Default),
-                icon = "\u2728"
-            )
+        callout(
+            richText("This page is automatically generated from the OpenAPI specification.\n"),
+            richText("Do not edit!\n"),
+            richText("File: "), richText(fileName, code = true, color = Default),
+            icon = "\u2728"
+        )
 
-            heading1("Summary")
+        heading1("Summary")
 
-            table(4, hasColumnHeader = true) {
-                row {
-                    cell(richText("Method"))
-                    cell(richText("Endpoint"))
-                    cell(richText("Authentication"))
-                    cell(richText("Description"))
-                }
-
-                for (path in swagger.openAPI.paths) {
-                    for ((method, operation) in path.value.readOperationsMap()) {
-                        val security = operation.security ?: swagger.openAPI.security
-                        row {
-                            cell(richText(method.name, code = true, color = Green))
-                            cell(richText(path.key, code = true, color = Default))
-                            cell(security?.flatMap { it.keys }?.joinToString(", ") ?: "")
-                            cell(operation.summary ?: operation.description ?: "")
-                        }
-                    }
-                }
+        table(4, hasColumnHeader = true) {
+            row {
+                cell(richText("Method"))
+                cell(richText("Endpoint"))
+                cell(richText("Authentication"))
+                cell(richText("Description"))
             }
-
-            heading1("Endpoints")
 
             for (path in swagger.openAPI.paths) {
                 for ((method, operation) in path.value.readOperationsMap()) {
-                    heading2(operation.summary ?: "[please add summary]")
-
-                    paragraph(
-                        richText(" ${method.name} ", code = true, bold = true, color = Green),
-                        richText(" ${path.key}", code = true, color = Default)
-                    )
-
-                    paragraph(operation.description ?: "")
-
                     val security = operation.security ?: swagger.openAPI.security
-                    security?.let { _ ->
-                        heading3("Authentication")
-                        security.flatMap { it.keys }.forEach {
-                            bullet(it)
+                    row {
+                        cell(richText(method.name, code = true, color = Green))
+                        cell(richText(path.key, code = true, color = Default))
+                        cell(security?.flatMap { it.keys }?.joinToString(", ") ?: "")
+                        cell(operation.summary ?: operation.description ?: "")
+                    }
+                }
+            }
+        }
+
+        heading1("Endpoints")
+
+        for (path in swagger.openAPI.paths) {
+            for ((method, operation) in path.value.readOperationsMap()) {
+                heading2(operation.summary ?: "[please add summary]")
+
+                paragraph(
+                    richText(" ${method.name} ", code = true, bold = true, color = Green),
+                    richText(" ${path.key}", code = true, color = Default)
+                )
+
+                paragraph(operation.description ?: "")
+
+                val security = operation.security ?: swagger.openAPI.security
+                security?.let { _ ->
+                    heading3("Authentication")
+                    security.flatMap { it.keys }.forEach {
+                        bullet(it)
+                    }
+                }
+
+                if (!operation.parameters.isNullOrEmpty()) {
+                    heading3("Parameters")
+                    quote("Bold parameters are required", color = BlockColor.Gray)
+                    table(4, hasRowHeader = true, hasColumnHeader = true) {
+                        row {
+                            cell(richText("Name"))
+                            cell(richText("Type"))
+                            cell(richText("Location"))
+                            cell(richText("Description"))
+                        }
+                        for (parameter in operation.parameters) {
+                            val required = parameter.required == true
+                            row {
+                                cell(richText(parameter.name, bold = required, code = true, color = Default))
+                                cell(richText(parameter.schema?.type ?: ""))
+                                cell(richText(parameter.`in`))
+                                cell(richText(parameter.description ?: ""))
+                            }
                         }
                     }
+                }
 
-                    if (!operation.parameters.isNullOrEmpty()) {
-                        heading3("Parameters")
-                        quote("Bold parameters are required", color = BlockColor.Gray)
-                        table(4, hasRowHeader = true, hasColumnHeader = true) {
-                            row {
-                                cell(richText("Name"))
-                                cell(richText("Type"))
-                                cell(richText("Location"))
-                                cell(richText("Description"))
-                            }
-                            for (parameter in operation.parameters) {
-                                val required = parameter.required == true
+                operation.requestBody?.let { request ->
+                    heading3("Request")
+                    request.description?.let { desc ->
+                        paragraph(desc)
+                    }
+                    request.content?.let { contents ->
+                        for ((contentType, content) in contents) {
+                            paragraph(richText("Content-Type: "), richText(contentType, code = true, color = Default))
+
+                            quote("Bold fields are required", color = BlockColor.Gray)
+                            table(4, hasColumnHeader = true, hasRowHeader = true) {
                                 row {
-                                    cell(richText(parameter.name, bold = required, code = true, color = Default))
-                                    cell(richText(parameter.schema?.type ?: ""))
-                                    cell(richText(parameter.`in`))
-                                    cell(richText(parameter.description ?: ""))
+                                    cell(richText("Name"))
+                                    cell(richText("Type"))
+                                    cell(richText("Description"))
+                                    cell(richText("Example"))
+                                }
+                                objectRows("", content.schema)
+                            }
+
+                            content.example?.let { example ->
+                                toggle("Example") {
+                                    codeBlock(language = "json", content = example.toString().trim())
                                 }
                             }
                         }
                     }
+                }
 
-                    operation.requestBody?.let { request ->
-                        heading3("Request")
-                        request.description?.let { desc ->
-                            paragraph(desc)
-                        }
-                        request.content?.let { contents ->
+                operation.responses?.let { responses ->
+                    heading3("Response")
+
+                    for ((code, response) in responses) {
+                        paragraph(
+                            richText(
+                                "$code ${response.description ?: ""}",
+                                code = true,
+                                bold = true,
+                                color = if (code.startsWith("2")) Green else Orange
+                            )
+                        )
+                        response.content?.takeIf { it.isNotEmpty() }?.let { contents ->
                             for ((contentType, content) in contents) {
                                 paragraph(richText("Content-Type: "), richText(contentType, code = true, color = Default))
 
@@ -115,93 +150,57 @@ object NotionTemplate {
                                     }
                                 }
                             }
-                        }
-                    }
+                        } ?: paragraph(richText("No content", italic = true))
 
-                    operation.responses?.let { responses ->
-                        heading3("Response")
-
-                        for ((code, response) in responses) {
-                            paragraph(
-                                richText(
-                                    "$code ${response.description ?: ""}",
-                                    code = true,
-                                    bold = true,
-                                    color = if (code.startsWith("2")) Green else Orange
-                                )
-                            )
-                            response.content?.takeIf { it.isNotEmpty() }?.let { contents ->
-                                for ((contentType, content) in contents) {
-                                    paragraph(richText("Content-Type: "), richText(contentType, code = true, color = Default))
-
-                                    quote("Bold fields are required", color = BlockColor.Gray)
-                                    table(4, hasColumnHeader = true, hasRowHeader = true) {
-                                        row {
-                                            cell(richText("Name"))
-                                            cell(richText("Type"))
-                                            cell(richText("Description"))
-                                            cell(richText("Example"))
-                                        }
-                                        objectRows("", content.schema)
-                                    }
-
-                                    content.example?.let { example ->
-                                        toggle("Example") {
-                                            codeBlock(language = "json", content = example.toString().trim())
-                                        }
-                                    }
-                                }
-                            } ?: paragraph(richText("No content", italic = true))
-
-                            paragraph(" ")
-                        }
+                        paragraph(" ")
                     }
                 }
             }
+        }
 
-            heading1("Authentication")
+        heading1("Authentication")
 
-            for ((name, security) in swagger.openAPI.components.securitySchemes) {
-                heading2(name)
+        for ((name, security) in swagger.openAPI.components.securitySchemes) {
+            heading2(name)
 
-                security.description?.let { desc ->
-                    paragraph(desc)
+            security.description?.let { desc ->
+                paragraph(desc)
+            }
+
+            table(2, hasRowHeader = true) {
+                row {
+                    cell(richText("Type"))
+                    cell(richText(security.type.toString()))
                 }
-
-                table(2, hasRowHeader = true) {
+                security.`in`?.let {
                     row {
-                        cell(richText("Type"))
-                        cell(richText(security.type.toString()))
+                        cell(richText("In"))
+                        cell(richText(it.toString()))
                     }
-                    security.`in`?.let {
-                        row {
-                            cell(richText("In"))
-                            cell(richText(it.toString()))
-                        }
-                        row {
-                            cell(richText("Name"))
-                            cell(richText(security.name ?: ""))
-                        }
+                    row {
+                        cell(richText("Name"))
+                        cell(richText(security.name ?: ""))
                     }
-                    security?.openIdConnectUrl?.let { url ->
-                        row {
-                            cell(richText("Connect URL"))
-                            cell(richText(url))
-                        }
+                }
+                security?.openIdConnectUrl?.let { url ->
+                    row {
+                        cell(richText("Connect URL"))
+                        cell(richText(url))
                     }
-                    security.flows?.let { flows ->
-                        // TODO oauth2 flows
-                    }
-                    security.scheme?.let { scheme ->
-                        row {
-                            cell(richText("Scheme"))
-                            cell(richText(scheme))
-                        }
+                }
+                security.flows?.let { flows ->
+                    // TODO oauth2 flows
+                }
+                security.scheme?.let { scheme ->
+                    row {
+                        cell(richText("Scheme"))
+                        cell(richText(scheme))
                     }
                 }
             }
         }
     }
+
 
     private fun RowsBuilder.objectRows(path: String, schema: Schema<*>) {
         if (schema is ObjectSchema) {
@@ -230,6 +229,5 @@ object NotionTemplate {
             }
         }
     }
-
 
 }
