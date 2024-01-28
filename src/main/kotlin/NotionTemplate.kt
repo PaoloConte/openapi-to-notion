@@ -17,7 +17,7 @@ object NotionTemplate {
             callout(
                 richText("This page is automatically generated from the OpenAPI specification. Do not edit!\n"),
                 richText("File: "), richText(fileName, code = true, color = Default),
-                icon = "\uD83D\uDCA1"
+                icon = "\u2728"
             )
 
             heading1("Summary")

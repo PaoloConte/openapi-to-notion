@@ -5,6 +5,7 @@ import io.swagger.v3.parser.core.models.ParseOptions
 import notion.api.v1.NotionClient
 import notion.api.v1.logging.Slf4jLogger
 import notion.api.v1.model.blocks.ChildPageBlock
+import notion.api.v1.model.common.Emoji
 import notion.api.v1.model.pages.Page
 import notion.api.v1.model.pages.PageParent
 import org.slf4j.LoggerFactory
@@ -63,7 +64,9 @@ private fun createDocumentationPage(
 
 private fun createPage(client: NotionClient, targetPage: String, title: String): Page {
     return client.createPage(
-        PageParent(pageId = targetPage), mapOf("title" to title(title))
+        parent = PageParent(pageId = targetPage),
+        properties = mapOf("title" to title(title)),
+        icon = Emoji(emoji = "\u2728")
     )
 }
 
