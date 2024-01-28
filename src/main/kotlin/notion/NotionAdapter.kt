@@ -4,7 +4,6 @@ import notion.api.v1.NotionClient
 import notion.api.v1.exception.NotionAPIError
 import notion.api.v1.logging.Slf4jLogger
 import notion.api.v1.model.blocks.Block
-import notion.api.v1.model.blocks.Blocks
 import notion.api.v1.model.blocks.ChildPageBlock
 import notion.api.v1.model.common.Emoji
 import notion.api.v1.model.pages.Page
@@ -37,9 +36,12 @@ class NotionAdapter(
     }
 
     /** Writes a template to a page */
-    fun writeTemplate(blockId: String, blocks: List<Block>): Blocks {
-        return withRetry {
-            client.appendBlockChildren(blockId, blocks)
+    fun writeTemplate(blockId: String, blocks: List<Block>): List<Block> {
+        return blocks.chunked(100).flatMap { chunk ->
+            val saved = withRetry {
+                client.appendBlockChildren(blockId, chunk)
+            }
+            saved.results
         }
     }
 
