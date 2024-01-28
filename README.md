@@ -6,3 +6,9 @@ Experimental utility to convert OpenAPI definitions to Notion Pages via the Noti
 
 ### Program Arguments
 - path of the folder containing the OpenAPI definitions
+
+### Usage
+- Create an internal Notion integration and get the secret token
+- The Target Notion page needs to be shared with the integration
+- The OpenAPI definitions need to have a unique title which will be used as the page title
+- Run the program with the environment variables and the path to the folder containing the OpenAPI definitions
