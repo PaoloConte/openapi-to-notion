@@ -51,14 +51,14 @@ private fun createDocumentationPage(
         return
     }
 
-    logger.info("Deleting Page $pageTitle if exists")
+    logger.info("Deleting Page '$pageTitle' if exists")
     deletePage(client, targetPage, pageTitle)
-    logger.info("Creating Page $pageTitle")
+    logger.info("Creating Page '$pageTitle'")
     val page = createPage(client, targetPage, swagger.openAPI.info.title)
-    logger.info("Created page $pageTitle with id ${page.id}")
+    logger.info("Created Page '$pageTitle' with id ${page.id}")
     val template = NotionTemplate.render(swagger, file.fileName.toString())
     val blocks = client.appendBlockChildren(page.id, template)
-    logger.info("Added ${blocks.results.size} blocks to page $pageTitle")
+    logger.info("Added ${blocks.results.size} blocks to page '$pageTitle'")
 }
 
 private fun createPage(client: NotionClient, targetPage: String, title: String): Page {
