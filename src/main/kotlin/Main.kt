@@ -59,6 +59,7 @@ private fun createDocumentationPage(
 
     val pageId = preparePage(client, targetPage, swagger.openAPI.info.title)
     val template = NotionTemplate.render(swagger, file.fileName.toString())
+    logger.info("Writing template to page '$pageTitle'")
     val blocks = client.appendBlockChildren(pageId, template)
     logger.info("Added ${blocks.results.size} blocks to page '$pageTitle'")
 }
