@@ -127,7 +127,7 @@ object NotionTemplate {
                                     color = if (code.startsWith("2")) Green else Orange
                                 )
                             )
-                            response.content?.let { contents ->
+                            response.content?.takeIf { it.isNotEmpty() }?.let { contents ->
                                 for ((contentType, content) in contents) {
                                     paragraph(richText("Content-Type: "), richText(contentType, code = true, color = Default))
 
@@ -148,7 +148,9 @@ object NotionTemplate {
                                         }
                                     }
                                 }
-                            }
+                            } ?: paragraph(richText("No content", italic = true))
+
+                            paragraph(" ")
                         }
                     }
                 }
