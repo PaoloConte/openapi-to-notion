@@ -53,7 +53,7 @@ class App(
         val template = NotionTemplate.render(swagger, file.fileName.toString())
         logger.info("Writing template to page '$pageTitle'")
         val blocks = client.writeTemplate(pageId, template)
-        logger.info("Added ${blocks.results.size} blocks to page '$pageTitle'")
+        logger.info("Added ${blocks.size} blocks to page '$pageTitle'")
     }
 
 }

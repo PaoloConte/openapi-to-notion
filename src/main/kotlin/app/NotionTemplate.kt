@@ -1,6 +1,6 @@
 package io.paoloconte.app
 
-import io.paoloconte.notion.BlocksBuilder.RowsBuilder
+import io.paoloconte.notion.BlocksBuilder
 import io.paoloconte.notion.blocks
 import io.paoloconte.notion.richText
 import io.swagger.v3.oas.models.media.ArraySchema
@@ -97,16 +97,8 @@ object NotionTemplate {
                         for ((contentType, content) in contents) {
                             paragraph(richText("Content-Type: "), richText(contentType, code = true, color = Default))
 
-                            quote("Bold fields are required", color = BlockColor.Gray)
-                            table(4, hasColumnHeader = true, hasRowHeader = true) {
-                                row {
-                                    cell(richText("Name"))
-                                    cell(richText("Type"))
-                                    cell(richText("Description"))
-                                    cell(richText("Example"))
-                                }
-                                objectRows("", content.schema)
-                            }
+                            propertiesRow("", content.schema)
+                            divider()
 
                             content.example?.let { example ->
                                 toggle("Example") {
@@ -133,16 +125,8 @@ object NotionTemplate {
                             for ((contentType, content) in contents) {
                                 paragraph(richText("Content-Type: "), richText(contentType, code = true, color = Default))
 
-                                quote("Bold fields are required", color = BlockColor.Gray)
-                                table(4, hasColumnHeader = true, hasRowHeader = true) {
-                                    row {
-                                        cell(richText("Name"))
-                                        cell(richText("Type"))
-                                        cell(richText("Description"))
-                                        cell(richText("Example"))
-                                    }
-                                    objectRows("", content.schema)
-                                }
+                                propertiesRow("", content.schema)
+                                divider()
 
                                 content.example?.let { example ->
                                     toggle("Example") {
@@ -202,32 +186,57 @@ object NotionTemplate {
     }
 
 
-    private fun RowsBuilder.objectRows(path: String, schema: Schema<*>) {
+
+    private fun BlocksBuilder.propertiesRow(path: String, schema: Schema<*>) {
         if (schema is ObjectSchema) {
             schema.properties?.forEach { (property, value) ->
-                val rowPath = "$path.$property".removePrefix(".")
-                val required = schema.required?.contains(property) == true
-                row {
-                    cell(richText(rowPath, bold = required, code = true, color = Default))
-                    cell(value.type)
-                    cell(value.description ?: "")
-                    cell(value.example?.toString() ?: "")
-                }
-                if (value is ObjectSchema) {
-                    objectRows(rowPath, value)
-                }
-                if (value is ArraySchema) {
-                    objectRows("$rowPath[]", value.items)
-                }
+                propertiesRowItem(path, property, value, schema)
             }
         } else {
-            row {
-                cell(richText(path, bold = true))
-                cell(schema.type)
-                cell(schema.description ?: "")
-                cell(schema.example?.toString() ?: "")
-            }
+            propertiesRowItem(path, "", schema)
         }
     }
+
+    private fun BlocksBuilder.propertiesRowItem(path: String, property: String, value: Schema<*>, parentSchema: Schema<*>? = null){
+        val rowPath = "$path.$property".removePrefix(".").removeSuffix(".")
+        val required = parentSchema?.required?.contains(property) == true
+        val example = value.example?.toString()?.takeIf { it.isNotBlank() }
+        val description = value.description ?: ""
+        val oneliner = example == null || description.length + example.length < 80
+
+        divider()
+
+        paragraph(
+            richText(rowPath, code = true, color = Default),
+            richText("  "),
+            richText(value.type, code = true, color = Pink),
+            richText("  "),
+            richText(if (required) "Required" else "Optional", code = true, color = if (required) Red else Green),
+        )
+
+        if (example != null) {
+            if (oneliner) {
+                paragraph(
+                    richText("$description. "),
+                    richText("Example: ", bold = true),
+                    richText(example, code = true, color = Blue)
+                )
+            } else {
+                paragraph(richText(description))
+                paragraph(richText("Example: ", bold = true), richText(example, code = true, color = Blue))
+            }
+        } else {
+            paragraph(richText(description))
+        }
+
+
+        if (value is ObjectSchema) {
+            propertiesRow(rowPath, value)
+        }
+        if (value is ArraySchema) {
+            propertiesRow("$rowPath[]", value.items)
+        }
+    }
+
 
 }

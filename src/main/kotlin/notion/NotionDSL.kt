@@ -59,8 +59,14 @@ internal class BlocksBuilder {
         blocks.add(ParagraphBlock(paragraph = ParagraphBlock.Element(richText = text.map { richText(it) })))
     }
 
-    fun paragraph(vararg text: RichText) {
-        blocks.add(ParagraphBlock(paragraph = ParagraphBlock.Element(richText = text.toList())))
+    fun paragraph(vararg text: RichText, color: BlockColor? = null) {
+        blocks.add(ParagraphBlock(
+            paragraph = ParagraphBlock.Element(richText = text.toList(), color = color),
+        ))
+    }
+
+    fun divider() {
+        blocks.add(DividerBlock(divider = DividerBlock.Element()))
     }
 
     fun bullet(vararg text: String) {
