@@ -1,6 +1,8 @@
-package io.paoloconte
+package io.paoloconte.app
 
-import io.paoloconte.BlocksBuilder.RowsBuilder
+import io.paoloconte.notion.BlocksBuilder.RowsBuilder
+import io.paoloconte.notion.blocks
+import io.paoloconte.notion.richText
 import io.swagger.v3.oas.models.media.ArraySchema
 import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema

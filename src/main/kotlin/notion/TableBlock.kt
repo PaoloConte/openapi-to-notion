@@ -1,4 +1,4 @@
-package io.paoloconte
+package io.paoloconte.notion
 
 import com.google.gson.annotations.SerializedName
 import notion.api.v1.model.blocks.Block

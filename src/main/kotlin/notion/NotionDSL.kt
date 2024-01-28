@@ -1,4 +1,4 @@
-package io.paoloconte
+package io.paoloconte.notion
 
 import notion.api.v1.model.blocks.*
 import notion.api.v1.model.blocks.HeadingOneBlock.Element
