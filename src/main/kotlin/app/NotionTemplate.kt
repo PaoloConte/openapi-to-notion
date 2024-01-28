@@ -110,20 +110,23 @@ object NotionTemplate {
                 }
 
                 operation.responses?.let { responses ->
+                    paragraph("")
                     heading3("Response")
 
                     for ((code, response) in responses) {
-                        paragraph(
-                            richText(
-                                "$code ${response.description ?: ""}",
-                                code = true,
-                                bold = true,
-                                color = if (code.startsWith("2")) Green else Orange
-                            )
-                        )
                         response.content?.takeIf { it.isNotEmpty() }?.let { contents ->
                             for ((contentType, content) in contents) {
-                                paragraph(richText("Content-Type: "), richText(contentType, code = true, color = Default))
+                                quote(
+                                    richText(
+                                        "$code ${response.description ?: ""}",
+                                        code = true,
+                                        bold = true,
+                                        color = if (code.startsWith("2")) Green else Orange
+                                    ),
+                                    richText("  Content-Type: ", color = Default),
+                                    richText(contentType, code = true, color = Default),
+                                    color = if (code.startsWith("2")) BlockColor.Green else BlockColor.Orange
+                                )
 
                                 propertiesRow("", content.schema)
                                 divider()
@@ -134,8 +137,18 @@ object NotionTemplate {
                                     }
                                 }
                             }
-                        } ?: paragraph(richText("No content", italic = true))
-
+                        } ?: run {
+                            quote(
+                                richText(
+                                    "$code ${response.description ?: ""}",
+                                    code = true,
+                                    bold = true,
+                                    color = if (code.startsWith("2")) Green else Orange
+                                ),
+                                richText("  No Content ", color = Default, italic = true),
+                                color = if (code.startsWith("2")) BlockColor.Green else BlockColor.Orange
+                            )
+                        }
                         paragraph(" ")
                     }
                 }

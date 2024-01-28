@@ -76,9 +76,13 @@ internal class BlocksBuilder {
     }
 
     fun quote(vararg text: String, color: BlockColor? = null) {
+        quote(*text.map { richText(it) }.toTypedArray(), color = color)
+    }
+
+    fun quote(vararg text: RichText, color: BlockColor? = null) {
         blocks.add(QuoteBlock(
             quote = QuoteBlock.Element(
-                richText = text.map { richText(it) },
+                richText = text.toList(),
                 color = color
             )
         ))
