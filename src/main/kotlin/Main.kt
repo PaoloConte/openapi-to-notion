@@ -105,10 +105,11 @@ private fun <T> withRetry(maxTries: Int = 20, block: () -> T): T {
         try {
             return block()
         } catch (e: NotionAPIError) {
-            if (e.httpResponse.status == 429) {
+            val status = e.httpResponse.status
+            if (status == 429 || status >= 500) {
                 backoff = min(2 * backoff, 10)
                 val seconds = backoff
-                logger.warn("Too many requests, waiting for $seconds seconds")
+                logger.warn("Received status=$status, waiting for $seconds seconds")
                 Thread.sleep(1000 * seconds)
             } else {
                 logger.error("Request failed", e)
