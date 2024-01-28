@@ -60,9 +60,9 @@ class NotionAdapter(
         logger.info("Deleting contents of page '$pageTitle'")
         val children = withRetry { client.retrieveBlockChildren(pageId) }
         children.results.forEach { block ->
-                logger.info("Deleting block ${block.id} from page $pageTitle")
-                withRetry { client.deleteBlock(block.id!!) }
-            }
+            logger.info("Deleting block ${block.id} from page $pageTitle")
+            withRetry { client.deleteBlock(block.id!!) }
+        }
     }
 
     override fun close() {
