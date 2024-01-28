@@ -58,11 +58,13 @@ class NotionAdapter(
 
     private fun deletePageContents(pageId: String, pageTitle: String) {
         logger.info("Deleting contents of page '$pageTitle'")
-        val children = withRetry { client.retrieveBlockChildren(pageId) }
-        children.results.forEach { block ->
-            logger.info("Deleting block ${block.id} from page $pageTitle")
-            withRetry { client.deleteBlock(block.id!!) }
-        }
+        do {
+            val children = withRetry { client.retrieveBlockChildren(pageId) }
+            children.results.forEach { block ->
+                logger.info("Deleting block ${block.id} from page $pageTitle")
+                withRetry { client.deleteBlock(block.id!!) }
+            }
+        } while (children.hasMore)
     }
 
     override fun close() {
@@ -86,6 +88,9 @@ class NotionAdapter(
                     logger.error("Request failed", e)
                     throw e
                 }
+            } catch (e: Exception) {
+                logger.error("Request failed", e)
+                throw e
             }
         }
         throw RuntimeException("Too many retries")
