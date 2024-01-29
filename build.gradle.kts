@@ -29,7 +29,7 @@ tasks {
         archiveFileName.set("app.jar")
         mergeServiceFiles()
         manifest {
-            attributes(mapOf("Main-Class" to "MainKt"))
+            attributes(mapOf("Main-Class" to "io.paoloconte.MainKt"))
         }
     }
 }
