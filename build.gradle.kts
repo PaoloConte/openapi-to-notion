@@ -20,6 +20,7 @@ dependencies {
     implementation("io.swagger.parser.v3:swagger-parser:$swaggerParserVersion")
     implementation("com.github.seratch:notion-sdk-jvm-core:$notionSdkVersion")
     implementation("com.github.seratch:notion-sdk-jvm-slf4j:$notionSdkVersion")
+    implementation("com.github.seratch:notion-sdk-jvm-httpclient:${notionSdkVersion}")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }

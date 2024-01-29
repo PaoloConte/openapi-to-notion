@@ -2,6 +2,7 @@ package io.paoloconte.notion
 
 import notion.api.v1.NotionClient
 import notion.api.v1.exception.NotionAPIError
+import notion.api.v1.http.JavaNetHttpClient
 import notion.api.v1.logging.Slf4jLogger
 import notion.api.v1.model.blocks.Block
 import notion.api.v1.model.blocks.ChildPageBlock
@@ -17,7 +18,7 @@ class NotionAdapter(
 ): Closeable {
 
     private val logger = LoggerFactory.getLogger(javaClass.simpleName)
-    private val client = NotionClient(token = token, logger = Slf4jLogger())
+    private val client = NotionClient(token = token, logger = Slf4jLogger(), httpClient = JavaNetHttpClient())
 
     /** Prepares a page by creating it if it does not exist or deleting its contents if it does */
     fun preparePage(parentPage: String, pageTitle: String): String {
