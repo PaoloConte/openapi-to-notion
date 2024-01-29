@@ -65,6 +65,19 @@ internal class BlocksBuilder {
         ))
     }
 
+    fun paragraph(vararg text: RichText, color: BlockColor? = null, content: BlocksBuilder.() -> Unit) {
+        val children = BlocksBuilder().apply(content).build()
+        children.chunked(100).forEach { chunk ->
+            blocks.add(ParagraphBlock(
+                paragraph = ParagraphBlock.Element(
+                    richText = text.toList(),
+                    color = color,
+                    children = chunk
+                )
+            ))
+        }
+    }
+
     fun divider() {
         blocks.add(DividerBlock(divider = DividerBlock.Element()))
     }
