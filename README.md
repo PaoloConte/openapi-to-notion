@@ -2,7 +2,7 @@ Experimental utility to convert OpenAPI definitions to Notion Pages via the Noti
 
 ### Requirements
 - Java 11+
-- 
+
 ### Build
 ```bash
 ./gradlew build shadowJar
