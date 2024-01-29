@@ -65,6 +65,10 @@ internal class BlocksBuilder {
         ))
     }
 
+    fun paragraph(vararg text: String, color: BlockColor? = null, content: BlocksBuilder.() -> Unit) {
+        paragraph(*text.map { richText(it) }.toTypedArray(), color = color, content = content)
+    }
+
     fun paragraph(vararg text: RichText, color: BlockColor? = null, content: BlocksBuilder.() -> Unit) {
         val children = BlocksBuilder().apply(content).build()
         children.chunked(100).forEach { chunk ->

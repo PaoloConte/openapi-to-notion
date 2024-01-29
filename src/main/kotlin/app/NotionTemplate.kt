@@ -15,15 +15,17 @@ object NotionTemplate {
 
     fun render(swagger: SwaggerParseResult, fileName: String): List<Block> = blocks {
         // wrap everything inside a paragraph, so it can be easily deleted with few calls
-        paragraph(richText("")) {
 
+        paragraph("") {
             callout(
                 richText("This page is automatically generated from the OpenAPI specification.\n"),
                 richText("Do not edit!\n"),
                 richText("File: "), richText(fileName, code = true, color = Default),
                 icon = "\u2728"
             )
+        }
 
+        paragraph("") {
             heading1("Summary")
 
             table(4, hasColumnHeader = true) {
@@ -46,11 +48,11 @@ object NotionTemplate {
                     }
                 }
             }
+        }
 
-            heading1("Endpoints")
-
-            for (path in swagger.openAPI.paths) {
-                for ((method, operation) in path.value.readOperationsMap()) {
+        for (path in swagger.openAPI.paths) {
+            for ((method, operation) in path.value.readOperationsMap()) {
+                paragraph("") {
                     heading2(operation.summary ?: "[please add summary]")
 
                     paragraph(
@@ -60,6 +62,9 @@ object NotionTemplate {
 
                     paragraph(operation.description ?: "")
 
+                }
+
+                paragraph("") {
                     val security = operation.security ?: swagger.openAPI.security
                     security?.let { _ ->
                         heading3("Authentication")
@@ -110,9 +115,10 @@ object NotionTemplate {
                             }
                         }
                     }
+                }
 
+                paragraph("") {
                     operation.responses?.let { responses ->
-                        paragraph("")
                         heading3("Response")
 
                         for ((code, response) in responses) {
@@ -156,7 +162,9 @@ object NotionTemplate {
                     }
                 }
             }
+        }
 
+        paragraph("") {
             heading1("Authentication")
 
             for ((name, security) in swagger.openAPI.components.securitySchemes) {
@@ -198,10 +206,9 @@ object NotionTemplate {
                     }
                 }
             }
-
         }
-    }
 
+    }
 
 
     private fun BlocksBuilder.propertiesRow(path: String, schema: Schema<*>) {
@@ -214,7 +221,7 @@ object NotionTemplate {
         }
     }
 
-    private fun BlocksBuilder.propertiesRowItem(path: String, property: String, value: Schema<*>, parentSchema: Schema<*>? = null){
+    private fun BlocksBuilder.propertiesRowItem(path: String, property: String, value: Schema<*>, parentSchema: Schema<*>? = null) {
         val rowPath = "$path.$property".removePrefix(".").removeSuffix(".")
         val required = parentSchema?.required?.contains(property) == true
         val example = value.example?.toString()?.takeIf { it.isNotBlank() }
