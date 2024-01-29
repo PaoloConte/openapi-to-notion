@@ -21,5 +21,6 @@ Experimental utility to convert OpenAPI definitions to Notion Pages via the Noti
 ```bash
 export TARGET_PAGE=1234567890
 export NOTION_TOKEN=secret_ababababababababababba
-java -jar build/libs/app.jar /path/to/folder
+# properties are required by HttpUrlConnPatchMethodWorkaround in Notion SDK
+java -jar --add-opens java.base/sun.net.www.protocol.https=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED build/libs/app.jar /path/to/folder
 ```
