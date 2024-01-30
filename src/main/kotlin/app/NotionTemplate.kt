@@ -227,6 +227,7 @@ object NotionTemplate {
         val example = value.example?.toString()?.takeIf { it.isNotBlank() }
         val description = value.description ?: ""
         val oneliner = example == null || description.length + example.length < 80 || description.isBlank()
+        val defaultStr = value.default?.toString()?.takeIf { it.isNotBlank() }?.let { " (default: $it)" } ?: ""
 
         divider()
 
@@ -235,7 +236,7 @@ object NotionTemplate {
             richText("  "),
             richText(value.type, code = true, color = Pink),
             richText("  "),
-            richText(if (required) "Required" else "Optional", code = true, color = if (required) Red else Green),
+            richText(if (required) "Required" else "Optional$defaultStr", code = true, color = if (required) Red else Green),
         )
 
         if (example != null) {
