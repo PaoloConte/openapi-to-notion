@@ -26,3 +26,6 @@ export TARGET_PAGE=1234567890
 export NOTION_TOKEN=secret_ababababababababababba
 java -jar build/libs/app.jar /path/to/folder
 ```
+
+# Test Screenshot
+![screenshot](screenshot.png)

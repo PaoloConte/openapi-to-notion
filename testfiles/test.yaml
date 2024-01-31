@@ -1,0 +1,137 @@
+openapi: 3.0.3
+info:
+  title: Test API Definition
+  version: 1.0.0
+  license:
+    name: "Test"
+    url: "https://example.com/license"
+security:
+  - BasicAuth: []
+paths:
+  /api/items:
+    post:
+      operationId: "postItems"
+      summary: "Add Items"
+      description: "Add new items to the database"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemsRequest"
+            example: |
+              {
+                
+              }
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ItemsResponse"
+              example: |
+                {    
+                    "status": true,
+                    "count": 10
+                }
+        "500":
+          description: "Internal Server Error"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example: |
+                {    
+                    "status": false,
+                    "message": "Something bad happened
+                }
+
+components:
+  securitySchemes:
+    BasicAuth:
+      description: "Authentication with Basic Auth"
+      type: http
+      scheme: basic
+
+  schemas:
+    ItemsRequest:
+      type: object
+      required:
+        - category
+      properties:
+        category:
+          type: string
+          description: "The category for these items"
+          example: "Animals"
+        metadata:
+          type: object
+          description: "Custom metadata for the items"
+          properties:
+            status:
+              type: string
+              description: "Status of the items"
+              example: "active"
+          additionalProperties:
+            type: object
+            description: "Metadata name"
+            required:
+              - tag
+              - value
+            properties:
+              tag:
+                type: string
+                description: "Metadata tag"
+              value:
+                type: string
+                description: "Metadata value"
+        items:
+          type: array
+          description: "List of items"
+          items:
+            type: object
+            required:
+              - name
+              - price
+            properties:
+              name:
+                type: string
+                description: "Item Name"
+                example: "Chameleon"
+              description:
+                type: string
+                description: "Item Description"
+                example: "A lizard that changes color"
+              price:
+                type: object
+                required:
+                  - value
+                  - currency
+                properties:
+                    value:
+                        type: number
+                        description: "Price"
+                        example: 100.00
+                    currency:
+                        type: string
+                        description: "Currency"
+                        example: "USD"
+
+    ItemsResponse:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          description: "Number of items added"
+
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: "Error message"
