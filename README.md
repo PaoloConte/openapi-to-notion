@@ -1,5 +1,7 @@
 Experimental utility to convert OpenAPI definitions to Notion Pages via the Notion API.
 
+**Note**: Only really works with OpenAPI 3.0 definitions. Version 3.1 will need some adjustments.
+
 ### Requirements
 - Java 11+
 
