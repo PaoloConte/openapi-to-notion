@@ -21,7 +21,17 @@ paths:
               $ref: "#/components/schemas/ItemsRequest"
             example: |
               {
-                
+                "category": "Animals",
+                "items": [
+                  {
+                    "name": "Chameleon",
+                    "description": "A lizard that changes color",
+                    "price": {
+                      "value": 100.00,
+                      "currency": "USD"
+                    }
+                  }
+                ]
               }
       responses:
         "200":
@@ -32,7 +42,6 @@ paths:
                 $ref: "#/components/schemas/ItemsResponse"
               example: |
                 {    
-                    "status": true,
                     "count": 10
                 }
         "500":
@@ -43,7 +52,6 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example: |
                 {    
-                    "status": false,
                     "message": "Something bad happened
                 }
 
@@ -59,6 +67,7 @@ components:
       type: object
       required:
         - category
+        - items
       properties:
         category:
           type: string
