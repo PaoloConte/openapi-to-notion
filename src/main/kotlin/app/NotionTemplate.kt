@@ -4,6 +4,7 @@ import io.paoloconte.notion.BlocksBuilder
 import io.paoloconte.notion.blocks
 import io.paoloconte.notion.richText
 import io.swagger.v3.oas.models.media.ArraySchema
+import io.swagger.v3.oas.models.media.MapSchema
 import io.swagger.v3.oas.models.media.ObjectSchema
 import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.parser.core.models.SwaggerParseResult
@@ -216,6 +217,14 @@ object NotionTemplate {
             schema.properties?.forEach { (property, value) ->
                 propertiesRowItem(path, property, value, schema)
             }
+        } else if (schema is MapSchema) {
+            schema.properties?.forEach { (property, value) ->
+                propertiesRowItem(path, property, value, schema)
+            }
+            schema.additionalProperties?.let { additionalProperties ->
+                if (additionalProperties !is Schema<*>) return@let
+                propertiesRowItem(path, "<*>", additionalProperties)
+            }
         } else {
             propertiesRowItem(path, "", schema)
         }
@@ -255,7 +264,7 @@ object NotionTemplate {
         }
 
 
-        if (value is ObjectSchema) {
+        if (value is ObjectSchema || value is MapSchema) {
             propertiesRow(rowPath, value)
         }
         if (value is ArraySchema) {
