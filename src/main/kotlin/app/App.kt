@@ -38,7 +38,7 @@ class App(
         val options = ParseOptions().apply { isResolveFully = true }
         val swagger = OpenAPIParser().readLocation(file.absolutePathString(), null, options)
 
-        if (swagger.openAPI.info == null) {
+        if (swagger.openAPI?.info == null) {
             logger.warn("Skipping ${file.fileName} because it does not have an info section")
             return
         }
