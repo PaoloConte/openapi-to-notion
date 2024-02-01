@@ -65,6 +65,9 @@ components:
   schemas:
     ItemsRequest:
       type: object
+      externalDocs:
+        description: "External docs"
+        url: "https://en.wikipedia.org/wiki/Animal"
       required:
         - category
         - items
@@ -72,6 +75,9 @@ components:
         category:
           type: string
           description: "The category for these items"
+          externalDocs:
+            description: "Animal docs"
+            url: "https://en.wikipedia.org/wiki/Animal"
           example: "Animals"
         metadata:
           type: object

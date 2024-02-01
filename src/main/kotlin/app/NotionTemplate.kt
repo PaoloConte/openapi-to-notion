@@ -105,6 +105,10 @@ object NotionTemplate {
                             for ((contentType, content) in contents) {
                                 paragraph(richText("Content-Type: "), richText(contentType, code = true, color = Default))
 
+                                content.schema.externalDocs?.let {
+                                    paragraph(richText("Documentation: ", bold = true), richText(it.description ?: it.url, link = it.url))
+                                }
+
                                 propertiesRow("", content.schema)
                                 divider()
 
@@ -261,6 +265,10 @@ object NotionTemplate {
             }
         } else if (description.isNotBlank()) {
             paragraph(richText(description))
+        }
+
+        value.externalDocs?.let {
+            paragraph(richText("Documentation: ", bold = true), richText(it.description ?: it.url, link = it.url))
         }
 
 

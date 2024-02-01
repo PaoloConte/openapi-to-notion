@@ -123,7 +123,8 @@ internal class BlocksBuilder {
         ))
     }
 
-    fun richText(text: String) = RichText(text = Text(text))
+    fun richText(text: String, link: String? = null)
+        = RichText(text = Text(content = text, link = link?.let { RichText.Link(url = it) }))
 
     fun callout(vararg text: String, icon: String) {
         callout(*text.map { richText(it) }.toTypedArray(), icon = icon)
