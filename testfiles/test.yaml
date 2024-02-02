@@ -2,6 +2,7 @@ openapi: 3.0.3
 info:
   title: Test API Definition
   version: 1.0.0
+  x-notion-flatten: true
   license:
     name: "Test"
     url: "https://example.com/license"

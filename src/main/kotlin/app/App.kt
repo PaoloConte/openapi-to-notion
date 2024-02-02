@@ -49,8 +49,9 @@ class App(
             return
         }
 
+        val flatten = swagger.openAPI.info.extensions?.get("x-notion-flatten") as? Boolean ?: false
+        val template = NotionTemplate(swagger, file.fileName.toString(), flatten).render()
         val pageId = client.preparePage(targetPage, swagger.openAPI.info.title)
-        val template = NotionTemplate(swagger, file.fileName.toString()).render()
         logger.info("Writing template to page '$pageTitle'")
         val blocks = client.writeTemplate(pageId, template)
         logger.info("Added ${blocks.size} blocks to page '$pageTitle'")

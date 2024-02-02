@@ -16,8 +16,11 @@ import notion.api.v1.model.common.RichTextColor.*
 
 class NotionTemplate(
     private val swagger: SwaggerParseResult,
-    private val fileName: String
+    private val fileName: String,
+    private val flatten: Boolean
 ) {
+
+    private val consumedComponents = mutableListOf<Schema<*>>()
 
     fun render(): List<Block> = blocks {
         // wrap everything inside a paragraph, so it can be easily deleted with few calls
@@ -33,6 +36,13 @@ class NotionTemplate(
         for (path in swagger.openAPI.paths) {
             for ((method, operation) in path.value.readOperationsMap()) {
                 operationSection(path.key, method.name, operation)
+            }
+        }
+
+        val components = swagger.openAPI.components.schemas.filter { (_, schema) -> !consumedComponents.contains(schema) }
+        if (!flatten && components.isNotEmpty()) {
+            paragraph("") {
+                componentsSection(components)
             }
         }
 
@@ -78,7 +88,7 @@ class NotionTemplate(
 
     private fun BlocksBuilder.operationSection(path: String, method: String, operation: Operation) {
         paragraph("") {
-            heading2(operation.summary ?: "[please add summary]")
+            heading1(operation.summary ?: "[please add summary]")
 
             paragraph(
                 richText(" $method ", code = true, bold = true, color = Green),
@@ -90,9 +100,7 @@ class NotionTemplate(
 
         paragraph("") {
             operationAuth(operation)
-
             operationParams(operation)
-
             operationRequestSection(operation)
         }
 
@@ -115,6 +123,7 @@ class NotionTemplate(
                         paragraph(richText("Documentation: ", bold = true), richText(it.description ?: it.url, link = it.url))
                     }
 
+                    consumedComponents.add(content.schema)
                     propertiesRow("", content.schema)
                     divider()
                     exampleItem(content.example)
@@ -137,6 +146,7 @@ class NotionTemplate(
         response.content?.takeIf { it.isNotEmpty() }?.let { contents ->
             for ((contentType, content) in contents) {
                 responseBodyHeader(code, response, contentType)
+                consumedComponents.add(content.schema)
                 propertiesRow("", content.schema)
                 divider()
                 exampleItem(content.example)
@@ -200,6 +210,19 @@ class NotionTemplate(
                 bullet(it)
             }
         }
+    }
+
+    private fun BlocksBuilder.componentsSection(schemas: Map<String, Schema<*>>) {
+        heading1("Schemas")
+
+        for ((name, schema) in schemas) {
+            heading3(name)
+            schema.description?.let { desc ->
+                paragraph(desc)
+            }
+            propertiesRow("", schema)
+        }
+
     }
 
     private fun BlocksBuilder.authenticationSection() {
@@ -278,13 +301,15 @@ class NotionTemplate(
         val description = value.description ?: ""
         val oneliner = example == null || description.length + example.length < 80 || description.isBlank()
         val defaultStr = value.default?.toString()?.takeIf { it.isNotBlank() }?.let { " (default: $it)" } ?: ""
+        val component = swagger.openAPI.components.schemas.entries.find { it.value === value }
 
         divider()
+
 
         paragraph(
             richText(rowPath, code = true, color = Default),
             richText("  "),
-            richText(value.type, code = true, color = Pink),
+            richText(component?.key ?: value.type, code = true, color = Pink),
             richText("  "),
             richText(if (required) "Required" else "Optional$defaultStr", code = true, color = if (required) Red else Green),
         )
@@ -308,6 +333,9 @@ class NotionTemplate(
             paragraph(richText("Documentation: ", bold = true), richText(it.description ?: it.url, link = it.url))
         }
 
+        if (!flatten && component != null) {
+            return
+        }
 
         if (value is ObjectSchema || value is MapSchema) {
             propertiesRow(rowPath, value)

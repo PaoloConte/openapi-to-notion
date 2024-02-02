@@ -29,5 +29,9 @@ export NOTION_TOKEN=secret_ababababababababababba
 java -jar build/libs/app.jar /path/to/folder
 ```
 
+### Options
+OpenAPI extensions:
+- `x-notion-flatten` : Flatten the object structure instead of linking to schemas (default false).
+
 # Test Screenshot
 ![screenshot](screenshot.png)
