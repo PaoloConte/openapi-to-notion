@@ -35,7 +35,10 @@ class App(
     ) {
         logger.info("Processing ${file.fileName}")
 
-        val options = ParseOptions().apply { isResolveFully = true }
+        val options = ParseOptions().apply {
+            isResolve = true
+            isResolveFully = false
+        }
         val swagger = OpenAPIParser().readLocation(file.absolutePathString(), null, options)
 
         if (swagger.openAPI?.info == null) {

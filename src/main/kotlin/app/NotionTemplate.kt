@@ -120,7 +120,6 @@ class NotionTemplate(
                         paragraph(richText("Documentation: ", bold = true), richText(it.description ?: it.url, link = it.url))
                     }
 
-                    consumedComponents.add(content.schema)
                     propertiesRow("", content.schema)
                     divider()
                     exampleItem(content.example)
@@ -143,7 +142,6 @@ class NotionTemplate(
         response.content?.takeIf { it.isNotEmpty() }?.let { contents ->
             for ((contentType, content) in contents) {
                 responseBodyHeader(code, response, contentType)
-                consumedComponents.add(content.schema)
                 propertiesRow("", content.schema)
                 divider()
                 exampleItem(content.example)
@@ -268,6 +266,13 @@ class NotionTemplate(
 
 
     private fun BlocksBuilder.propertiesRow(path: String, schema: Schema<*>) {
+        schema.`$ref`?.let { ref ->
+            val resolvedSchema = resolveSchema(ref)
+            consumedComponents.add(resolvedSchema)
+            propertiesRow(path, resolvedSchema)
+            return
+        }
+
         when (schema) {
             is ObjectSchema -> {
                 schema.properties?.forEach { (property, value) ->
@@ -298,7 +303,7 @@ class NotionTemplate(
         val description = value.description ?: ""
         val oneliner = example == null || description.length + example.length < 80 || description.isBlank()
         val defaultStr = value.default?.toString()?.takeIf { it.isNotBlank() }?.let { " (default: $it)" } ?: ""
-        val component = swagger.openAPI.components.schemas.entries.find { it.value == value }
+        val component = value.`$ref`?.substringAfterLast("/")
 
         divider()
 
@@ -306,7 +311,7 @@ class NotionTemplate(
         paragraph(
             richText(rowPath, code = true, color = Default),
             richText("  "),
-            richText(component?.key ?: value.type ?: value.types?.firstOrNull() ?: "", code = true, color = Pink),
+            richText(component ?: value.type ?: value.types?.firstOrNull() ?: "", code = true, color = Pink),
             richText("  "),
             richText(if (required) "Required" else "Optional$defaultStr", code = true, color = if (required) Red else Green),
         )
@@ -342,5 +347,13 @@ class NotionTemplate(
         }
     }
 
+    private fun resolveSchema(ref: String): Schema<*> {
+        val components = swagger.openAPI.components
+        val schema = components.schemas[ref]
+        if (schema != null) return schema
+        val refSchema = components.schemas[ref.substringAfterLast("/")]
+        if (refSchema != null) return refSchema
+        error("Could not resolve schema $ref")
+    }
 
 }
