@@ -4,10 +4,7 @@ import io.paoloconte.notion.BlocksBuilder
 import io.paoloconte.notion.blocks
 import io.paoloconte.notion.richText
 import io.swagger.v3.oas.models.Operation
-import io.swagger.v3.oas.models.media.ArraySchema
-import io.swagger.v3.oas.models.media.MapSchema
-import io.swagger.v3.oas.models.media.ObjectSchema
-import io.swagger.v3.oas.models.media.Schema
+import io.swagger.v3.oas.models.media.*
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.parser.core.models.SwaggerParseResult
 import notion.api.v1.model.blocks.Block
@@ -278,7 +275,7 @@ class NotionTemplate(
                 }
             }
 
-            is MapSchema -> {
+            is MapSchema, is JsonSchema -> {
                 schema.properties?.forEach { (property, value) ->
                     propertiesRowItem(path, property, value, schema)
                 }
@@ -301,7 +298,7 @@ class NotionTemplate(
         val description = value.description ?: ""
         val oneliner = example == null || description.length + example.length < 80 || description.isBlank()
         val defaultStr = value.default?.toString()?.takeIf { it.isNotBlank() }?.let { " (default: $it)" } ?: ""
-        val component = swagger.openAPI.components.schemas.entries.find { it.value === value }
+        val component = swagger.openAPI.components.schemas.entries.find { it.value == value }
 
         divider()
 
@@ -309,7 +306,7 @@ class NotionTemplate(
         paragraph(
             richText(rowPath, code = true, color = Default),
             richText("  "),
-            richText(component?.key ?: value.type, code = true, color = Pink),
+            richText(component?.key ?: value.type ?: value.types?.firstOrNull() ?: "", code = true, color = Pink),
             richText("  "),
             richText(if (required) "Required" else "Optional$defaultStr", code = true, color = if (required) Red else Green),
         )
@@ -337,7 +334,7 @@ class NotionTemplate(
             return
         }
 
-        if (value is ObjectSchema || value is MapSchema) {
+        if (value is ObjectSchema || value is MapSchema || value is JsonSchema) {
             propertiesRow(rowPath, value)
         }
         if (value is ArraySchema) {
