@@ -36,7 +36,9 @@ class NotionTemplate(
             }
         }
 
-        val components = swagger.openAPI.components.schemas.filter { (_, schema) -> !consumedComponents.contains(schema) }
+        val components = swagger.openAPI.components.schemas
+            ?.filter { (_, schema) -> !consumedComponents.contains(schema) }
+            ?: emptyMap()
         if (!flatten && components.isNotEmpty()) {
             paragraph("") {
                 componentsSection(components)
