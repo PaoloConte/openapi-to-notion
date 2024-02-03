@@ -1,0 +1,33 @@
+name: 'OpenAPI to Notion Action'
+description: 'Converts OpenAPI definitions to Notion pages'
+inputs:
+  app-version:
+    description: 'Release tag of the notion-openapi tool'
+    required: true
+  openapi-folder:
+    description: 'Folder containing OpenAPI definitions'
+    required: true
+  notion-token:
+    description: 'Notion API token'
+    required: true
+  target-page:
+    description: 'Notion page ID where to store the generated pages'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: 'adopt'
+    - name: Download JAR file
+      run: |
+        curl -L -o app.jar https://github.com/PaoloConte/openapi-to-notion/releases/download/${{ inputs.app-version }}/app.jar
+      shell: bash
+    - name: Execute Java Program
+      env:
+        NOTION_TOKEN: ${{ inputs.notion-token }}
+        TARGET_PAGE: ${{ inputs.target-page }}
+      run: java -jar app.jar ${{ inputs.openapi-folder }}
+      shell: bash
