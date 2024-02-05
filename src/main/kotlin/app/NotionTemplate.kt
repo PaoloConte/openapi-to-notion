@@ -306,6 +306,7 @@ class NotionTemplate(
         val oneliner = example == null || description.length + example.length < 80 || description.isBlank()
         val defaultStr = value.default?.toString()?.takeIf { it.isNotBlank() }?.let { " (default: $it)" } ?: ""
         val component = value.`$ref`?.substringAfterLast("/")
+            ?: value.items?.`$ref`?.substringAfterLast("/")?.let { "array<$it>" }
 
         divider()
 
@@ -344,7 +345,7 @@ class NotionTemplate(
         if (value is ObjectSchema || value is MapSchema || value is JsonSchema) {
             propertiesRow(rowPath, value)
         }
-        if (value is ArraySchema) {
+        if (value is ArraySchema || value.items != null) {
             propertiesRow("$rowPath[]", value.items)
         }
     }
