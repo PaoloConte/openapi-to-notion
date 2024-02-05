@@ -38,8 +38,13 @@ class App(
         val options = ParseOptions().apply {
             isResolve = true
             isResolveFully = false
+            isValidateExternalRefs = true
         }
         val swagger = OpenAPIParser().readLocation(file.absolutePathString(), null, options)
+
+        if (swagger.messages?.any { it.startsWith("Exception safe-checking yaml content") } == true) {
+            error("Invalid YAML file: ${file.fileName}\n${swagger.messages.joinToString("\n")} ")
+        }
 
         if (swagger.openAPI?.info == null) {
             logger.warn("Skipping ${file.fileName} because it does not have an info section")
