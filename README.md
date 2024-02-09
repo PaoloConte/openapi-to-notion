@@ -23,10 +23,14 @@ jobs:
       - name: Build API docs
         uses: PaoloConte/openapi-to-notion@main
         with:
-          openapi-folder: 'docs/folder'
-          target-page: '111112222233334444455556667777' 
-          app-version: ${{ env.APP_VERSION }}
           notion-token: ${{ secrets.NOTION_TOKEN }}
+          config: |
+            pages:
+              - notionPageId: aaaaaaaaaaaaaaa
+                apiFolder: path/to/docs
+              - notionPageId: bbbbbbbbbbbbbbb
+                apiFolder: path/to/other  
+
 ```
 # Run Locally
 
@@ -46,10 +50,18 @@ jobs:
 - path of the folder containing the OpenAPI definitions
 
 ### Run
+Create a `config.yaml` file with the following content:
+```yaml
+pages:
+  - notionPageId: aaaaaaaaaaaaaaa
+    apiFolder: path/to/docs
+  - notionPageId: bbbbbbbbbbbbbbb
+    apiFolder: path/to/other
+```
+Execute
 ```bash
-export TARGET_PAGE=1234567890
 export NOTION_TOKEN=secret_ababababababababababba
-java -jar build/libs/app.jar /path/to/folder
+java -jar build/libs/app.jar --config-file config.yaml 
 ```
 
 # Test Screenshot
