@@ -1,18 +1,15 @@
 name: 'OpenAPI to Notion Action'
 description: 'Converts OpenAPI definitions to Notion pages'
 inputs:
-  app-version:
-    description: 'Release tag of the notion-openapi tool'
-    required: true
-  openapi-folder:
-    description: 'Folder containing OpenAPI definitions'
-    required: true
   notion-token:
     description: 'Notion API token'
     required: true
-  target-page:
-    description: 'Notion page ID where to store the generated pages'
-    required: true
+  config-file:
+    description: 'Path to the configuration file'
+    required: false
+  config:
+    description: 'Configuration YAML'
+    required: false
 runs:
   using: 'composite'
   steps:
@@ -21,13 +18,31 @@ runs:
       with:
         java-version: 11
         distribution: 'adopt'
+
     - name: Download JAR file
       run: |
-        curl -L -o app.jar https://github.com/PaoloConte/openapi-to-notion/releases/download/${{ inputs.app-version }}/app.jar
+        curl -L -o app.jar https://github.com/PaoloConte/openapi-to-notion/releases/download/v1.1/app.jar
       shell: bash
-    - name: Execute Java Program
+
+    - name: Prepare Config File
       env:
         NOTION_TOKEN: ${{ inputs.notion-token }}
-        TARGET_PAGE: ${{ inputs.target-page }}
-      run: java -jar app.jar ${{ inputs.openapi-folder }}
+        CONFIG_FILE: ${{ inputs.config-file }}
+        CONFIG: ${{ inputs.config }}
+      run: |
+        # Determine the config file path to use
+        if [ -n "$CONFIG_FILE" ]; then
+          CONFIG_PATH=$CONFIG_FILE
+        else
+          # If CONFIG_FILE is not provided, use CONFIG to create a temp file
+          echo "$CONFIG" > /tmp/config.yml
+          CONFIG_PATH=/tmp/config.yml
+        fi
+        echo "CONFIG_PATH=${CONFIG_PATH}" >> $GITHUB_ENV
       shell: bash
+
+    - name: Execute Java Program
+      run: java -jar app.jar --config-file ${{ env.CONFIG_PATH }}
+      shell: bash
+      env:
+        NOTION_TOKEN: ${{ inputs.notion-token }}
