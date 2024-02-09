@@ -45,9 +45,6 @@ jobs:
 ### Environment Variables
 - `NOTION_TOKEN` : The Notion integration API token
 
-### Program Arguments
-- path of the folder containing the OpenAPI definitions
-
 ### Run
 Create a `config.yaml` file with the following content:
 ```yaml
