@@ -21,7 +21,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Build API docs
-        uses: PaoloConte/openapi-to-notion@main
+        uses: PaoloConte/openapi-to-notion@v1.1
         with:
           notion-token: ${{ secrets.NOTION_TOKEN }}
           config: |
