@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Paths
 import io.swagger.v3.oas.models.SpecVersion.V31
 import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.servers.Server
 import io.swagger.v3.parser.core.models.ParseOptions
 import org.slf4j.LoggerFactory
@@ -36,6 +37,8 @@ object GenerateCollection {
     @OptIn(ExperimentalPathApi::class)
     private fun createCollection(folders: List<String>): OpenAPI {
         val collection = OpenAPI(V31).apply {
+            openapi = "3.1.0"
+            specVersion = V31
             info = Info().apply {
                 version = "1.0.0"
                 title = "Collection"
@@ -63,15 +66,31 @@ object GenerateCollection {
             val swagger = OpenAPIParser().readLocation(file.absolutePathString(), null, options)
             swagger.openAPI.info ?: return@forEach
             swagger.openAPI.paths?.forEach { (path, pathItem) ->
-                pathItem.servers = swagger.openAPI.servers
+                pathItem.servers = swagger.openAPI.servers?.filter { it.url != "/" }?.takeIf { it.isNotEmpty() }
                 pathItem.readOperations().forEach { operation ->
                     operation.security = operation.security ?: swagger.openAPI.security
+                    operation.requestBody?.content?.forEach { (mediaType, mediaTypeObject) ->
+                        mediaTypeObject.schema?.let { schema ->
+                            fixModel(schema)
+                        }
+                    }
                 }
                 collection.paths[path] = pathItem
             }
             collection.components.securitySchemes.putAll(swagger.openAPI.components.securitySchemes)
         }
         return collection
+    }
+
+    // improves compatibility with other tools
+    private fun fixModel(schema: Schema<*>) {
+        schema.properties?.forEach{ (key, value) ->
+            value.type = value.type ?: value.types?.firstOrNull()
+            fixModel(value)
+        }
+        schema.items?.let {
+            fixModel(it)
+        }
     }
 
     private fun generateYaml(collection: OpenAPI): String {
