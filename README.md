@@ -7,8 +7,20 @@ Experimental utility to convert OpenAPI definitions to Notion Pages via the Noti
 - Run the program locally or as a GitHub action
 
 # Options
-OpenAPI extensions:
+### OpenAPI extensions:
 - `x-notion-flatten` : Flatten the object structure instead of linking to schemas (default false).
+### Config File
+The config file is a YAML file with the following structure:
+```yaml
+generateCollection: '/path/to/collection.yaml'
+pages:
+  - notionPageId: aaaaaaaaaaaaaaa
+    apiFolder: path/to/docs
+  - notionPageId: bbbbbbbbbbbbbbb
+    apiFolder: path/to/other
+```
+The `pages` list is a list of Target Notion pages and the path to the folder containing the OpenAPI definitions.
+The `generateCollection` is an optional path to a collection file that will be generated with all the input files.
 
 # GitHub Action
 ```yaml
@@ -24,7 +36,7 @@ jobs:
         uses: PaoloConte/openapi-to-notion@v1.1
         with:
           notion-token: ${{ secrets.NOTION_TOKEN }}
-          config: |
+          config: |            
             pages:
               - notionPageId: aaaaaaaaaaaaaaa
                 apiFolder: path/to/docs
