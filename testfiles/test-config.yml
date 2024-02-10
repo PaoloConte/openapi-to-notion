@@ -1,3 +1,4 @@
+generateCollection: 'collection.yaml'
 pages:
   - notionPageId: bababababababababa
     apiFolder: testfiles

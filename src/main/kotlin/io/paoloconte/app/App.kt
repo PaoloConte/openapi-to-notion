@@ -33,6 +33,11 @@ class App(
                 }
             }
         }
+
+        if (!config.generateCollection.isNullOrBlank()) {
+            val folders = config.pages.map { it.apiFolder }
+            GenerateCollection.generate(folders, config.generateCollection)
+        }
     }
 
     private fun createDocumentationPage(
