@@ -69,6 +69,9 @@ object GenerateCollection {
                 pathItem.servers = swagger.openAPI.servers?.filter { it.url != "/" }?.takeIf { it.isNotEmpty() }
                 pathItem.readOperations().forEach { operation ->
                     operation.security = operation.security ?: swagger.openAPI.security
+                    operation.parameters?.forEach { param ->
+                        fixModel(param.schema)
+                    }
                     operation.requestBody?.content?.forEach { (mediaType, mediaTypeObject) ->
                         mediaTypeObject.schema?.let { schema ->
                             fixModel(schema)
