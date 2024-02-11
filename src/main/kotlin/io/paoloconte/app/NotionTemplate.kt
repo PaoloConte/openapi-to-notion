@@ -303,7 +303,7 @@ class NotionTemplate(
         val required = parentSchema?.required?.contains(property) == true
         val example = value.example?.toString()?.takeIf { it.isNotBlank() }
         val description = value.description ?: ""
-        val oneliner = example == null || description.length + example.length < 80 || description.isBlank()
+        val oneliner = example == null || description.length + example.length < 70 || description.isBlank()
         val defaultStr = value.default?.toString()?.takeIf { it.isNotBlank() }?.let { " (default: $it)" } ?: ""
         val component = value.`$ref`?.substringAfterLast("/")
             ?: value.items?.`$ref`?.substringAfterLast("/")?.let { "array<$it>" }
