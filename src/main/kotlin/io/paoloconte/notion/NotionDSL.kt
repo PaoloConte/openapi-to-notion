@@ -117,7 +117,7 @@ internal class BlocksBuilder {
     fun codeBlock(language: String, content: String) {
         blocks.add(CodeBlock(
             code = CodeBlock.Element(
-                richText = listOf(richText(content)),
+                richText = content.chunked(2000).map { richText(it) },
                 language = language
             )
         ))
