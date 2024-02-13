@@ -109,7 +109,6 @@ class NotionTemplate2(
 
                     schemaTable(content.schema)
 
-                    divider()
                     exampleItem(content.example)
                 }
             }
@@ -133,6 +132,7 @@ class NotionTemplate2(
 
             for ((code, response) in responses) {
                 operationResponseBody(response, code)
+                divider()
             }
         }
     }
@@ -142,7 +142,6 @@ class NotionTemplate2(
             for ((contentType, content) in contents) {
                 responseBodyHeader(code, response, contentType)
                 schemaTable(content.schema)
-                divider()
                 exampleItem(content.example)
             }
         } ?: run {
