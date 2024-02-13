@@ -4,6 +4,8 @@ import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.decodeFromStream
 import io.paoloconte.config.Config
 import io.paoloconte.notion.NotionAdapter
+import io.paoloconte.template.NotionTemplate1
+import io.paoloconte.template.NotionTemplate2
 import io.swagger.parser.OpenAPIParser
 import io.swagger.v3.parser.core.models.ParseOptions
 import org.slf4j.LoggerFactory
@@ -70,7 +72,10 @@ class App(
         }
 
         val flatten = swagger.openAPI.info.extensions?.get("x-notion-flatten") as? Boolean ?: false
-        val template = NotionTemplate(swagger, file.fileName.toString(), flatten).render()
+        val template = when (config.template) {
+            2 -> NotionTemplate2(swagger, file.fileName.toString(), flatten).render()
+            else -> NotionTemplate1(swagger, file.fileName.toString(), flatten).render()
+        }
         val pageId = client.preparePage(targetPage, swagger.openAPI.info.title)
         logger.info("Writing template to page '$pageTitle'")
         val blocks = client.writeTemplate(pageId, template)

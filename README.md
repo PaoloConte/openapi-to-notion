@@ -13,14 +13,16 @@ Experimental utility to convert OpenAPI definitions to Notion Pages via the Noti
 The config file is a YAML file with the following structure:
 ```yaml
 generateCollection: '/path/to/collection.yaml'
+template: 2
 pages:
   - notionPageId: aaaaaaaaaaaaaaa
     apiFolder: path/to/docs
   - notionPageId: bbbbbbbbbbbbbbb
     apiFolder: path/to/other
 ```
-The `pages` list is a list of Target Notion pages and the path to the folder containing the OpenAPI definitions.
-The `generateCollection` is an optional path to a collection file that will be generated with all the input files.
+- `pages`: list is a list of Target Notion pages and the path to the folder containing the OpenAPI definitions.
+- `generateCollection`: is an optional path to a collection file that will be generated with all the input files.
+- `template`: is an optional integer to select the template to use. Default is 2. (1 or 2)
 
 # GitHub Action
 ```yaml
@@ -64,4 +66,7 @@ java -jar build/libs/app.jar --config-file config.yaml
 ```
 
 # Test Screenshot
+### Template 2 (default)
+![screenshot](screenshot2.png)
+### Template 1
 ![screenshot](screenshot.png)

@@ -36,6 +36,9 @@ internal fun richText(
     )
 }
 
+fun richText(text: String, link: String? = null)
+        = RichText(text = Text(content = text, link = link?.let { RichText.Link(url = it) }))
+
 
 internal fun blocks(content: BlocksBuilder.() -> Unit) = BlocksBuilder().apply(content).build()
 
@@ -123,9 +126,6 @@ internal class BlocksBuilder {
         ))
     }
 
-    fun richText(text: String, link: String? = null)
-        = RichText(text = Text(content = text, link = link?.let { RichText.Link(url = it) }))
-
     fun callout(vararg text: String, icon: String) {
         callout(*text.map { richText(it) }.toTypedArray(), icon = icon)
     }
@@ -143,7 +143,7 @@ internal class BlocksBuilder {
     }
 
     fun table(
-        width: Int,
+        columns: Int,
         hasColumnHeader: Boolean = false,
         hasRowHeader: Boolean = false,
         builder: RowsBuilder.() -> Unit
@@ -152,7 +152,7 @@ internal class BlocksBuilder {
             TableBlock(
                 id = null,
                 table = TableBlock.Element(
-                    tableWidth = width,
+                    tableWidth = columns,
                     hasColumnHeader = hasColumnHeader,
                     hasRowHeader = hasRowHeader,
                     children = RowsBuilder().apply(builder).build()
@@ -167,8 +167,8 @@ internal class BlocksBuilder {
         class RowBuilder {
             private val cells = mutableListOf<List<RichText>>()
 
-            fun cell(vararg content: RichText) {
-                cells.add(content.toList())
+            fun cell(vararg content: RichText?) {
+                cells.add(content.filterNotNull().toList())
             }
 
             fun cell(vararg content: String) {

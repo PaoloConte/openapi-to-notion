@@ -1,8 +1,10 @@
-package io.paoloconte.app
+package io.paoloconte.template
 
 import io.paoloconte.notion.BlocksBuilder
+import io.paoloconte.notion.BlocksBuilder.RowsBuilder
 import io.paoloconte.notion.blocks
 import io.paoloconte.notion.richText
+import io.paoloconte.openapi.resolveSchema
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.media.*
 import io.swagger.v3.oas.models.responses.ApiResponse
@@ -11,24 +13,18 @@ import notion.api.v1.model.blocks.Block
 import notion.api.v1.model.common.BlockColor
 import notion.api.v1.model.common.RichTextColor.*
 
-class NotionTemplate(
+class NotionTemplate2(
     private val swagger: SwaggerParseResult,
     private val fileName: String,
     private val flatten: Boolean
-) {
+) : Template {
 
     private val consumedComponents = mutableListOf<Schema<*>>()
 
-    fun render(): List<Block> = blocks {
-        // wrap everything inside a paragraph, so it can be easily deleted with few calls
+    override fun render(): List<Block> = blocks {
 
-        paragraph("") {
-            pageHeader(fileName)
-        }
-
-        paragraph("") {
-            summarySection()
-        }
+        pageHeader(fileName)
+        summarySection()
 
         for (path in swagger.openAPI.paths) {
             for ((method, operation) in path.value.readOperationsMap()) {
@@ -40,15 +36,10 @@ class NotionTemplate(
             ?.filter { (_, schema) -> !consumedComponents.contains(schema) }
             ?: emptyMap()
         if (!flatten && components.isNotEmpty()) {
-            paragraph("") {
-                componentsSection(components)
-            }
+            componentsSection(components)
         }
 
-        paragraph("") {
-            authenticationSection()
-        }
-
+        authenticationSection()
     }
 
     private fun BlocksBuilder.pageHeader(fileName: String) {
@@ -86,26 +77,20 @@ class NotionTemplate(
     }
 
     private fun BlocksBuilder.operationSection(path: String, method: String, operation: Operation) {
-        paragraph("") {
-            heading1(operation.summary ?: "[please add summary]")
+        heading1(operation.summary ?: "[please add summary]")
 
-            paragraph(
-                richText(" $method ", code = true, bold = true, color = Green),
-                richText(" $path", code = true, color = Default)
-            )
+        paragraph(
+            richText(" $method ", code = true, bold = true, color = Green),
+            richText(" $path", code = true, color = Default)
+        )
 
-            paragraph(operation.description ?: "")
-        }
+        paragraph(operation.description ?: "")
 
-        paragraph("") {
-            operationAuth(operation)
-            operationParams(operation)
-            operationRequestSection(operation)
-        }
+        operationAuth(operation)
+        operationParams(operation)
+        operationRequestSection(operation)
 
-        paragraph("") {
-            operationResponseSection(operation)
-        }
+        operationResponseSection(operation)
     }
 
     private fun BlocksBuilder.operationRequestSection(operation: Operation) {
@@ -122,11 +107,23 @@ class NotionTemplate(
                         paragraph(richText("Documentation: ", bold = true), richText(it.description ?: it.url, link = it.url))
                     }
 
-                    propertiesRow("", content.schema)
+                    schemaTable(content.schema)
+
                     divider()
                     exampleItem(content.example)
                 }
             }
+        }
+    }
+
+    private fun BlocksBuilder.schemaTable(schema: Schema<*>) {
+        table(3, hasColumnHeader = true) {
+            row {
+                cell(richText("Name"))
+                cell(richText("Type"))
+                cell(richText("Description"))
+            }
+            propertiesRow("", schema)
         }
     }
 
@@ -144,14 +141,13 @@ class NotionTemplate(
         response.content?.takeIf { it.isNotEmpty() }?.let { contents ->
             for ((contentType, content) in contents) {
                 responseBodyHeader(code, response, contentType)
-                propertiesRow("", content.schema)
+                schemaTable(content.schema)
                 divider()
                 exampleItem(content.example)
             }
         } ?: run {
             responseBodyHeader(code, response, null)
         }
-        paragraph(" ")
     }
 
     private fun BlocksBuilder.exampleItem(example: Any?) {
@@ -178,7 +174,6 @@ class NotionTemplate(
     private fun BlocksBuilder.operationParams(operation: Operation) {
         if (!operation.parameters.isNullOrEmpty()) {
             heading3("Parameters")
-            quote("Bold parameters are required", color = BlockColor.Gray)
             table(4, hasRowHeader = true, hasColumnHeader = true) {
                 row {
                     cell(richText("Name"))
@@ -189,7 +184,7 @@ class NotionTemplate(
                 for (parameter in operation.parameters) {
                     val required = parameter.required == true
                     row {
-                        cell(richText(parameter.name, bold = required, code = true, color = Default))
+                        cell(richText(parameter.name + if(required) "" else "?", code = true, color = Default))
                         cell(richText(parameter.schema?.type ?: ""))
                         cell(richText(parameter.`in`))
                         cell(richText(parameter.description ?: ""))
@@ -217,7 +212,7 @@ class NotionTemplate(
             schema.description?.let { desc ->
                 paragraph(desc)
             }
-            propertiesRow("", schema)
+            schemaTable(schema)
         }
 
     }
@@ -267,9 +262,9 @@ class NotionTemplate(
     }
 
 
-    private fun BlocksBuilder.propertiesRow(path: String, schema: Schema<*>) {
+    private fun RowsBuilder.propertiesRow(path: String, schema: Schema<*>) {
         schema.`$ref`?.let { ref ->
-            val resolvedSchema = resolveSchema(ref)
+            val resolvedSchema = swagger.resolveSchema(ref)
             consumedComponents.add(resolvedSchema)
             propertiesRow(path, resolvedSchema)
             return
@@ -298,45 +293,31 @@ class NotionTemplate(
         }
     }
 
-    private fun BlocksBuilder.propertiesRowItem(path: String, property: String, value: Schema<*>, parentSchema: Schema<*>? = null) {
+    private fun RowsBuilder.propertiesRowItem(path: String, property: String, value: Schema<*>, parentSchema: Schema<*>? = null) {
         val rowPath = "$path.$property".removePrefix(".").removeSuffix(".")
         val required = parentSchema?.required?.contains(property) == true
-        val example = value.example?.toString()?.takeIf { it.isNotBlank() }
         val description = value.description ?: ""
-        val oneliner = example == null || description.length + example.length < 70 || description.isBlank()
         val defaultStr = value.default?.toString()?.takeIf { it.isNotBlank() }?.let { " (default: $it)" } ?: ""
         val component = value.`$ref`?.substringAfterLast("/")
             ?: value.items?.`$ref`?.substringAfterLast("/")?.let { "array<$it>" }
+        val type = component ?: value.type ?: value.types?.firstOrNull() ?: ""
+        val requiredStr = if (required) "" else "?"
 
-        divider()
 
-
-        paragraph(
-            richText(rowPath, code = true, color = Default),
-            richText("  "),
-            richText(component ?: value.type ?: value.types?.firstOrNull() ?: "", code = true, color = Pink),
-            richText("  "),
-            richText(if (required) "Required" else "Optional$defaultStr", code = true, color = if (required) Red else Green),
-        )
-
-        if (example != null) {
-            if (oneliner) {
-                paragraph(
-                    richText("$description. "),
-                    richText(" Example: ", bold = true),
-                    richText(example, code = true, color = Blue)
-                )
-            } else {
-                paragraph(richText(description))
-                paragraph(richText("Example: ", bold = true), richText(example, code = true, color = Blue))
-            }
-        } else if (description.isNotBlank()) {
-            paragraph(richText(description))
+        row {
+            cell(
+                richText(rowPath.dropLastWhile { it != '.' }, code = true, color = Default),
+                richText(rowPath.takeLastWhile { it != '.' }, code = true, color = Default, bold = true)
+            )
+            cell(richText(type+requiredStr, code = true, color = Pink))
+            cell(
+                richText("$description$defaultStr "),
+                value.externalDocs?.let { richText(it.description ?: "Docs", link = it.url) }
+            )
         }
 
-        value.externalDocs?.let {
-            paragraph(richText("Documentation: ", bold = true), richText(it.description ?: it.url, link = it.url))
-        }
+        /*
+        */
 
         if (!flatten && component != null) {
             return
@@ -350,13 +331,5 @@ class NotionTemplate(
         }
     }
 
-    private fun resolveSchema(ref: String): Schema<*> {
-        val components = swagger.openAPI.components
-        val schema = components.schemas[ref]
-        if (schema != null) return schema
-        val refSchema = components.schemas[ref.substringAfterLast("/")]
-        if (refSchema != null) return refSchema
-        error("Could not resolve schema $ref")
-    }
 
 }
