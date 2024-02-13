@@ -1,8 +1,8 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Test API Definition
   version: 1.0.0
-  x-notion-flatten: true
+  x-notion-flatten: false
   license:
     name: "Test"
     url: "https://example.com/license"
@@ -118,20 +118,28 @@ components:
                 type: string
                 description: "Item Description"
                 example: "A lizard that changes color"
+                externalDocs:
+                  description: "Wiki"
+                  url: "https://en.wikipedia.org/wiki/Chameleon"
               price:
-                type: object
-                required:
-                  - value
-                  - currency
-                properties:
-                    value:
-                        type: number
-                        description: "Price"
-                        example: 100.00
-                    currency:
-                        type: string
-                        description: "Currency"
-                        example: "USD"
+                $ref: "#/components/schemas/Price"
+                description: "Item Price"
+
+    Price:
+      type: object
+      description: "Item Price"
+      required:
+        - value
+        - currency
+      properties:
+        value:
+          type: number
+          description: "Price"
+          example: 100.00
+        currency:
+          type: string
+          description: "Currency"
+          example: "USD"
 
     ItemsResponse:
       type: object
@@ -141,7 +149,6 @@ components:
         count:
           type: integer
           description: "Number of items added"
-
 
     ErrorResponse:
       type: object
