@@ -58,15 +58,6 @@ jobs:
 - `NOTION_TOKEN` : The Notion integration API token
 
 ### Run
-Create a `config.yaml` file with the following content:
-```yaml
-pages:
-  - notionPageId: aaaaaaaaaaaaaaa
-    apiFolder: path/to/docs
-  - notionPageId: bbbbbbbbbbbbbbb
-    apiFolder: path/to/other
-```
-Execute
 ```bash
 export NOTION_TOKEN=secret_ababababababababababba
 java -jar build/libs/app.jar --config-file config.yaml 
