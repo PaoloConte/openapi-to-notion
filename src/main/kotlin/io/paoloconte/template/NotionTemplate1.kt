@@ -4,6 +4,7 @@ import io.paoloconte.notion.BlocksBuilder
 import io.paoloconte.notion.blocks
 import io.paoloconte.notion.richText
 import io.paoloconte.openapi.resolveSchema
+import io.paoloconte.template.components.exampleItem
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.media.*
 import io.swagger.v3.oas.models.responses.ApiResponse
@@ -125,7 +126,7 @@ class NotionTemplate1(
 
                     propertiesRow("", content.schema)
                     divider()
-                    exampleItem(content.example)
+                    exampleItem(content)
                 }
             }
         }
@@ -147,19 +148,12 @@ class NotionTemplate1(
                 responseBodyHeader(code, response, contentType)
                 propertiesRow("", content.schema)
                 divider()
-                exampleItem(content.example)
+                exampleItem(content)
             }
         } ?: run {
             responseBodyHeader(code, response, null)
         }
         paragraph(" ")
-    }
-
-    private fun BlocksBuilder.exampleItem(example: Any?) {
-        example ?: return
-        toggle("Example") {
-            codeBlock(language = "json", content = example.toString().trim())
-        }
     }
 
     private fun BlocksBuilder.responseBodyHeader(code: String, response: ApiResponse, contentType: String?) {
