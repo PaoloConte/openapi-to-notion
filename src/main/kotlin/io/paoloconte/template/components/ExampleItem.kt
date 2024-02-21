@@ -5,7 +5,7 @@ import io.paoloconte.notion.richText
 import io.swagger.v3.oas.models.media.MediaType
 
 internal fun BlocksBuilder.exampleItem(content: MediaType?) {
-    val hasExamples = !content?.examples.isNullOrEmpty() || !content?.examples.isNullOrEmpty()
+    val hasExamples = !content?.examples.isNullOrEmpty() || !content?.example?.toString().isNullOrEmpty()
     if (!hasExamples) return
     toggle("Examples") {
         content?.example?.let { example ->
