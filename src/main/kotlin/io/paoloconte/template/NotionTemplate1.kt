@@ -5,6 +5,7 @@ import io.paoloconte.notion.blocks
 import io.paoloconte.notion.richText
 import io.paoloconte.openapi.resolveSchema
 import io.paoloconte.template.components.exampleItem
+import io.paoloconte.template.components.pageHeader
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.media.*
 import io.swagger.v3.oas.models.responses.ApiResponse
@@ -16,7 +17,8 @@ import notion.api.v1.model.common.RichTextColor.*
 class NotionTemplate1(
     private val swagger: SwaggerParseResult,
     private val fileName: String,
-    private val flatten: Boolean
+    private val flatten: Boolean,
+    private val showHeader: Boolean,
 ) : Template {
 
     private val consumedComponents = mutableListOf<Schema<*>>()
@@ -25,7 +27,7 @@ class NotionTemplate1(
         // wrap everything inside a paragraph, so it can be easily deleted with few calls
 
         paragraph("") {
-            pageHeader(fileName)
+            pageHeader(fileName, showHeader)
         }
 
         paragraph("") {
@@ -51,15 +53,6 @@ class NotionTemplate1(
             authenticationSection()
         }
 
-    }
-
-    private fun BlocksBuilder.pageHeader(fileName: String) {
-        callout(
-            richText("This page is automatically generated from the OpenAPI specification.\n"),
-            richText("Do not edit!\n"),
-            richText("File: "), richText(fileName, code = true, color = Default),
-            icon = "\u2728"
-        )
     }
 
     private fun BlocksBuilder.summarySection() {

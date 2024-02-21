@@ -72,9 +72,10 @@ class App(
         }
 
         val flatten = swagger.openAPI.info.extensions?.get("x-notion-flatten") as? Boolean ?: false
+        val showHeader = swagger.openAPI.info.extensions?.get("x-notion-header") as? Boolean ?: true
         val template = when (config.template) {
-            2 -> NotionTemplate2(swagger, file.fileName.toString(), flatten).render()
-            else -> NotionTemplate1(swagger, file.fileName.toString(), flatten).render()
+            2 -> NotionTemplate2(swagger, file.fileName.toString(), flatten, showHeader).render()
+            else -> NotionTemplate1(swagger, file.fileName.toString(), flatten, showHeader).render()
         }
         val pageId = client.preparePage(targetPage, swagger.openAPI.info.title)
         logger.info("Writing template to page '$pageTitle'")
