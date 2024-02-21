@@ -9,6 +9,7 @@ Experimental utility to convert OpenAPI definitions to Notion Pages via the Noti
 # Options
 ### OpenAPI extensions:
 - `x-notion-flatten` : Flatten the object structure instead of linking to schemas (default false).
+- `x-notion-header`: Hide or show the page header (default true).
 ### Config File
 The config file is a YAML file with the following structure:
 ```yaml
