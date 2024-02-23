@@ -7,6 +7,7 @@ import io.paoloconte.notion.richText
 import io.paoloconte.openapi.resolveSchema
 import io.paoloconte.template.components.exampleItem
 import io.paoloconte.template.components.pageHeader
+import io.paoloconte.template.components.serverUrl
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.media.*
 import io.swagger.v3.oas.models.responses.ApiResponse
@@ -48,9 +49,7 @@ class NotionTemplate2(
     private fun BlocksBuilder.summarySection() {
         heading1("Summary")
 
-        swagger.openAPI.servers?.firstOrNull()?.let { server ->
-            paragraph(richText("Server: "), richText(server.url, code = true, color = Blue))
-        }
+        serverUrl(swagger.openAPI.servers)
 
         table(4, hasColumnHeader = true) {
             row {
