@@ -21,7 +21,7 @@ runs:
 
     - name: Download JAR file
       run: |
-        curl -L -o app.jar https://github.com/PaoloConte/openapi-to-notion/releases/download/v1.5.1/app.jar
+        curl -L -o app.jar https://github.com/PaoloConte/openapi-to-notion/releases/download/v1.5.2/app.jar
       shell: bash
 
     - name: Prepare Config File
