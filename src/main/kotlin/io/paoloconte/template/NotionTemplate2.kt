@@ -48,6 +48,10 @@ class NotionTemplate2(
     private fun BlocksBuilder.summarySection() {
         heading1("Summary")
 
+        swagger.openAPI.servers?.firstOrNull()?.let { server ->
+            paragraph(richText("Server: "), richText(server.url, code = true, color = Blue))
+        }
+
         table(4, hasColumnHeader = true) {
             row {
                 cell(richText("Method"))
