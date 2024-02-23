@@ -51,6 +51,7 @@ class NotionTemplate2(
 
         serverUrl(swagger.openAPI.servers)
 
+        heading3("Endpoints")
         table(4, hasColumnHeader = true) {
             row {
                 cell(richText("Method"))

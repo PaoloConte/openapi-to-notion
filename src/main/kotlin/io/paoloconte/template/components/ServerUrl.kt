@@ -6,7 +6,10 @@ import io.swagger.v3.oas.models.servers.Server
 import notion.api.v1.model.common.RichTextColor.Blue
 
 internal fun BlocksBuilder.serverUrl(servers: MutableList<Server>?) {
-    servers?.firstOrNull()?.takeIf { it.url != "/" }?.let { server ->
-        paragraph(richText("Server: "), richText(server.url, code = true, color = Blue))
+    val servers = servers?.filter { it.url != "/" }
+    if (servers.isNullOrEmpty()) return
+    heading3("Servers")
+    servers.forEach { server ->
+        paragraph(richText(if (server.description.isNullOrBlank()) "" else "${server.description}: "), richText(server.url, code = true, color = Blue))
     }
 }
