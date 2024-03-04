@@ -215,6 +215,11 @@ class NotionTemplate1(
     }
 
     private fun BlocksBuilder.authenticationSection() {
+
+        val securitySchemeMap = swagger.openAPI.components?.securitySchemes ?: emptyMap()
+
+        if (securitySchemeMap.isEmpty()) return
+
         heading1("Authentication")
 
         for ((name, security) in swagger.openAPI.components.securitySchemes) {

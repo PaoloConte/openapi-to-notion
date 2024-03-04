@@ -198,7 +198,7 @@ class NotionTemplate2(
 
     private fun BlocksBuilder.operationAuth(operation: Operation) {
         val security = operation.security ?: swagger.openAPI.security
-        security?.let { _ ->
+        security?.takeIf { it.isNotEmpty() }?.let { _ ->
             heading3("Authentication")
             security.flatMap { it.keys }.forEach {
                 bullet(it)
@@ -220,9 +220,13 @@ class NotionTemplate2(
     }
 
     private fun BlocksBuilder.authenticationSection() {
+        val securitySchemeMap = swagger.openAPI.components?.securitySchemes ?: emptyMap()
+
+        if (securitySchemeMap.isEmpty()) return
+
         heading1("Authentication")
 
-        for ((name, security) in swagger.openAPI.components?.securitySchemes ?: emptyMap()) {
+        for ((name, security) in securitySchemeMap) {
             heading2(name)
 
             security.description?.let { desc ->
