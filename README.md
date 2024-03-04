@@ -28,6 +28,7 @@ pages:
 - `template`: is an optional integer to select the template to use. Default is 2. (1 or 2)
 
 # GitHub Action
+It is necessary to use depth 0 to correctly evaluate files changed time
 ```yaml
 jobs:
   openapi-to-notion:
@@ -36,7 +37,9 @@ jobs:
       APP_VERSION: 'v1.0.0'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Build API docs
         uses: PaoloConte/openapi-to-notion@v1.1
         with:
