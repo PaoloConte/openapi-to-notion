@@ -36,7 +36,7 @@ class NotionTemplate2(
             }
         }
 
-        val components = swagger.openAPI.components.schemas
+        val components = swagger.openAPI.components?.schemas
             ?.filter { (_, schema) -> !consumedComponents.contains(schema) }
             ?: emptyMap()
         if (!flatten && components.isNotEmpty()) {
@@ -211,7 +211,7 @@ class NotionTemplate2(
     private fun BlocksBuilder.authenticationSection() {
         heading1("Authentication")
 
-        for ((name, security) in swagger.openAPI.components.securitySchemes) {
+        for ((name, security) in swagger.openAPI.components?.securitySchemes ?: emptyMap()) {
             heading2(name)
 
             security.description?.let { desc ->
