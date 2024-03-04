@@ -13,6 +13,14 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Install dependencies
+      run: sudo apt install git-restore-mtime
+      shell: bash
+
+    - name: Prepare repository
+      run: git restore-mtime
+      shell: bash
+
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
