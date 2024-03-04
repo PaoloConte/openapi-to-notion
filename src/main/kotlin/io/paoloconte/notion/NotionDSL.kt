@@ -7,12 +7,15 @@ import notion.api.v1.model.common.BlockColor.GrayBackground
 import notion.api.v1.model.common.Emoji
 import notion.api.v1.model.common.RichTextColor
 import notion.api.v1.model.pages.PageProperty
+import notion.api.v1.model.pages.PageProperty.Date
 import notion.api.v1.model.pages.PageProperty.RichText
 import notion.api.v1.model.pages.PageProperty.RichText.Annotations
 import notion.api.v1.model.pages.PageProperty.RichText.Text
+import java.time.ZonedDateTime
 
 
-internal fun title(text: String) = PageProperty(title = listOf(RichText(text = Text(text))))
+internal fun titleProperty(text: String) = PageProperty(title = listOf(RichText(text = Text(text))))
+internal fun dateProperty(datetime: ZonedDateTime) = PageProperty(id = "", date = Date(start = datetime.toString()))
 
 internal fun richText(
     text: String,

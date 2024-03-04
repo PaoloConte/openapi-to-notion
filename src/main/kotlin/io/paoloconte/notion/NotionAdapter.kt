@@ -11,17 +11,20 @@ import notion.api.v1.model.pages.Page
 import notion.api.v1.model.pages.PageParent
 import org.slf4j.LoggerFactory
 import java.io.Closeable
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import kotlin.math.min
 
 class NotionAdapter(
     private val token: String,
 ): Closeable {
 
+    private val PROP_GENERATED = "OpenAPI-Generated"
     private val logger = LoggerFactory.getLogger(javaClass.simpleName)
     private val client = NotionClient(token = token, logger = Slf4jLogger(), httpClient = JavaNetHttpClient())
 
     /** Prepares a page by creating it if it does not exist or deleting its contents if it does */
-    fun preparePage(parentPage: String, pageTitle: String): String {
+    fun getOrCreatePage(parentPage: String, pageTitle: String): String {
         val children = withRetry { client.retrieveBlockChildren(parentPage) }
         val pageId = children.results
             .filterIsInstance<ChildPageBlock>()
@@ -32,7 +35,6 @@ class NotionAdapter(
             return createPage(parentPage, pageTitle).id
         }
 
-        deletePageContents(pageId, pageTitle)
         return pageId
     }
 
@@ -51,13 +53,31 @@ class NotionAdapter(
         return withRetry {
             client.createPage(
                 parent = PageParent(pageId = targetPage),
-                properties = mapOf("title" to title(title)),
+                properties = mapOf("title" to titleProperty(title)),
                 icon = Emoji(emoji = "\u2728")
             )
         }
     }
 
-    private fun deletePageContents(pageId: String, pageTitle: String) {
+    fun updatePage(pageId: String) {
+        logger.info("Updating Page '$pageId'")
+        return withRetry {
+            client.updatePage(
+                pageId = pageId,
+                properties = mapOf(PROP_GENERATED to dateProperty(ZonedDateTime.now(ZoneOffset.UTC))),
+            )
+        }
+    }
+
+    fun getPageUpdatedDateTime(pageId: String): ZonedDateTime? {
+        val property = withRetry { client.retrievePagePropertyItem(pageId, PROP_GENERATED) }
+        val date = property.date?.start?.let {
+            try { ZonedDateTime.parse(it)} catch (e: Exception) { null }
+        }
+        return date
+    }
+
+    fun deletePageContents(pageId: String, pageTitle: String) {
         logger.info("Deleting contents of page '$pageTitle'")
         do {
             val children = withRetry { client.retrieveBlockChildren(pageId) }

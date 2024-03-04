@@ -11,10 +11,7 @@ import io.swagger.v3.parser.core.models.ParseOptions
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Path
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.extension
-import kotlin.io.path.walk
+import kotlin.io.path.*
 
 class App(
     private val notionToken: String,
@@ -47,7 +44,8 @@ class App(
         targetPage: String,
         file: Path
     ) {
-        logger.info("Processing ${file.fileName}")
+        val modified = file.getLastModifiedTime()
+        logger.info("Processing ${file.fileName} $modified")
 
         val options = ParseOptions().apply {
             isResolve = true
@@ -77,10 +75,21 @@ class App(
             2 -> NotionTemplate2(swagger, file.fileName.toString(), flatten, showHeader).render()
             else -> NotionTemplate1(swagger, file.fileName.toString(), flatten, showHeader).render()
         }
-        val pageId = client.preparePage(targetPage, swagger.openAPI.info.title)
+
+
+        logger.info("Preparing page '$pageTitle'")
+        val pageId = client.getOrCreatePage(targetPage, swagger.openAPI.info.title)
+        val generatedTime = client.getPageUpdatedDateTime(pageId)
+        if (generatedTime != null && generatedTime.toInstant().epochSecond >= modified.toInstant().epochSecond) {
+            logger.info("Page '$pageTitle' is up to date")
+            return
+        }
+
+        client.deletePageContents(pageId, pageTitle)
         logger.info("Writing template to page '$pageTitle'")
         val blocks = client.writeTemplate(pageId, template)
         logger.info("Added ${blocks.size} blocks to page '$pageTitle'")
+        client.updatePage(pageId)
     }
 
 }

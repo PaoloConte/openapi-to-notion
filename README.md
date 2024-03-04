@@ -3,6 +3,8 @@ Experimental utility to convert OpenAPI definitions to Notion Pages via the Noti
 # Usage
 - Create an internal Notion integration and get the secret token
 - The Target Notion page needs to be shared with the integration
+- The Target page needs to be contained in a notion Wiki (to be able to add properties)
+- Create a property in the Wiki named exactly `OpenAPI-Generated`
 - The OpenAPI definitions need to have a unique title which will be used as the page title
 - Run the program locally or as a GitHub action
 
