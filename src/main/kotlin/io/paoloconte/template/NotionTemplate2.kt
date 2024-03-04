@@ -114,6 +114,17 @@ class NotionTemplate2(
     }
 
     private fun BlocksBuilder.schemaTable(schema: Schema<*>) {
+        schema.externalDocs?.let {
+            paragraph(richText("Documentation: ", bold = true), richText(it.description ?: it.url, link = it.url))
+        }
+
+        if (schema.properties.isNullOrEmpty()
+            && schema.additionalProperties == null
+            && schema.items == null
+            && schema.`$ref` == null
+        ) {
+            return
+        }
         table(3, hasColumnHeader = true) {
             row {
                 cell(richText("Name"))
