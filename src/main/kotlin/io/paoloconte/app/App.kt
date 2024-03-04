@@ -81,7 +81,7 @@ class App(
         val pageId = client.getOrCreatePage(targetPage, swagger.openAPI.info.title)
         val generatedTime = client.getPageUpdatedDateTime(pageId)
         if (generatedTime != null && generatedTime.toInstant().epochSecond >= modified.toInstant().epochSecond) {
-            logger.info("Page '$pageTitle' is up to date")
+            logger.info("Page '$pageTitle' is up to date ($generatedTime)")
             return
         }
 
