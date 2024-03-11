@@ -80,7 +80,10 @@ object GenerateCollection {
                 }
                 collection.paths[path] = pathItem
             }
-            collection.components.securitySchemes.putAll(swagger.openAPI.components.securitySchemes)
+
+            swagger.openAPI.components?.securitySchemes?.let {
+                collection.components.securitySchemes.putAll(it)
+            }
         }
         return collection
     }
