@@ -21,7 +21,7 @@ class NotionAdapter(
 
     private val PROP_GENERATED = "OpenAPI-Generated"
     private val logger = LoggerFactory.getLogger(javaClass.simpleName)
-    private val client = NotionClient(token = token, logger = Slf4jLogger(), httpClient = JavaNetHttpClient())
+    private val client = NotionClient(token = token, logger = Slf4jLogger(), httpClient = JavaNetHttpClient(connectTimeoutMillis = 60000, readTimeoutMillis = 60000))
 
     /** Prepares a page by creating it if it does not exist or deleting its contents if it does */
     fun getOrCreatePage(parentPage: String, pageTitle: String): String {
