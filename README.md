@@ -33,15 +33,13 @@ It is necessary to use depth 0 to correctly evaluate files changed time
 jobs:
   openapi-to-notion:
     runs-on: ubuntu-latest
-    env:
-      APP_VERSION: 'v1.0.0'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Build API docs
-        uses: PaoloConte/openapi-to-notion@v1.1
+        uses: PaoloConte/openapi-to-notion@v1.6.2
         with:
           notion-token: ${{ secrets.NOTION_TOKEN }}
           config: |            
