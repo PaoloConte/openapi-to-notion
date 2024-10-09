@@ -84,6 +84,12 @@ class NotionTemplate2(
 
         paragraph(operation.description ?: "")
 
+        operation.externalDocs
+            ?.takeIf { it.url.isNotBlank() }
+            ?.let { docs ->
+                paragraph(richText("Documentation: ", bold = true), richText(docs.description ?: docs.url, link = docs.url))
+            }
+
         operationAuth(operation)
         operationParams(operation)
         operationRequestSection(operation)

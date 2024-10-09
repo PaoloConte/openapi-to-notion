@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.paoloconte"
-version = "1.0-SNAPSHOT"
+version = "1.6.2"
 
 repositories {
     mavenCentral()
