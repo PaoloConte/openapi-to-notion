@@ -1,4 +1,5 @@
-Experimental utility to convert OpenAPI definitions to Notion Pages via the Notion API.
+Experimental utility to convert OpenAPI definitions to Notion Pages via the Notion API.   
+WARNING: Code is messy, OpenAPI support is limited, just a proof of concept.  
 
 # Usage
 - Create an internal Notion integration and get the secret token
