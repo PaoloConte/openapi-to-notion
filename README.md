@@ -40,7 +40,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Build API docs
-        uses: PaoloConte/openapi-to-notion@v1.6.2
+        uses: PaoloConte/openapi-to-notion@v1.6.3
         with:
           notion-token: ${{ secrets.NOTION_TOKEN }}
           config: |            
