@@ -16,6 +16,7 @@ import java.time.ZonedDateTime
 
 internal fun titleProperty(text: String) = PageProperty(title = listOf(RichText(text = Text(text))))
 internal fun dateProperty(datetime: ZonedDateTime) = PageProperty(id = "", date = Date(start = datetime.toString()))
+internal fun textProperty(text: String) = PageProperty(id = "", richText = listOf(RichText(text = RichText.Text(text))) )
 
 internal fun richText(
     text: String,

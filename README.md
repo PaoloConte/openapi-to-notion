@@ -1,11 +1,14 @@
 Experimental utility to convert OpenAPI definitions to Notion Pages via the Notion API.   
 WARNING: Code is messy, OpenAPI support is limited, just a proof of concept.  
 
+### Changelog
+- v2.0.0 changes the property to use from `OpenAPI-Generated` to `OpenAPI-Hash`
+
 # Usage
 - Create an internal Notion integration and get the secret token
 - The Target Notion page needs to be shared with the integration
 - The Target page needs to be contained in a notion Wiki (to be able to add properties)
-- Create a property in the Wiki named exactly `OpenAPI-Generated`
+- Create a property in the Wiki named exactly `OpenAPI-Hash`
 - The OpenAPI definitions need to have a unique title which will be used as the page title
 - Run the program locally or as a GitHub action
 
@@ -40,7 +43,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Build API docs
-        uses: PaoloConte/openapi-to-notion@v1.6.3
+        uses: PaoloConte/openapi-to-notion@v2.0.0
         with:
           notion-token: ${{ secrets.NOTION_TOKEN }}
           config: |            

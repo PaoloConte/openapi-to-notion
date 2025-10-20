@@ -11,16 +11,17 @@ import notion.api.v1.model.pages.Page
 import notion.api.v1.model.pages.PageParent
 import org.slf4j.LoggerFactory
 import java.io.Closeable
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import kotlin.math.min
 
 class NotionAdapter(
     private val token: String,
 ): Closeable {
 
-    private val PROP_GENERATED = "OpenAPI-Generated"
-    private val logger = LoggerFactory.getLogger(javaClass.simpleName)
+    companion object {
+        private const val PROP_HASH = "OpenAPI-Hash"
+        private val logger = LoggerFactory.getLogger(NotionAdapter::class.simpleName)
+    }
+    
     private val client = NotionClient(token = token, logger = Slf4jLogger(), httpClient = JavaNetHttpClient(connectTimeoutMillis = 60000, readTimeoutMillis = 60000))
 
     /** Prepares a page by creating it if it does not exist or deleting its contents if it does */
@@ -59,22 +60,21 @@ class NotionAdapter(
         }
     }
 
-    fun updatePage(pageId: String) {
+    fun updatePageProperties(pageId: String, hash: String) {
         logger.info("Updating Page '$pageId'")
         return withRetry {
             client.updatePage(
                 pageId = pageId,
-                properties = mapOf(PROP_GENERATED to dateProperty(ZonedDateTime.now(ZoneOffset.UTC))),
+                properties = mapOf(PROP_HASH to textProperty(hash)),
             )
         }
     }
 
-    fun getPageUpdatedDateTime(pageId: String): ZonedDateTime? {
-        val property = withRetry { client.retrievePagePropertyItem(pageId, PROP_GENERATED) }
-        val date = property.date?.start?.let {
-            try { ZonedDateTime.parse(it)} catch (e: Exception) { null }
-        }
-        return date
+    fun getPageHash(pageId: String): String {
+        val property = withRetry { client.retrievePagePropertyItem(pageId, PROP_HASH) }
+        return property.richText?.text?.content?.trim()
+            ?: property.results?.firstOrNull()?.richText?.text?.content?.trim()
+            ?: ""
     }
 
     fun deletePageContents(pageId: String, pageTitle: String) {

@@ -11,6 +11,8 @@ import io.swagger.v3.parser.core.models.ParseOptions
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Path
+import java.security.MessageDigest
+import java.util.*
 import kotlin.io.path.*
 
 class App(
@@ -45,7 +47,12 @@ class App(
         file: Path
     ) {
         val modified = file.getLastModifiedTime()
-        logger.info("Processing ${file.fileName} $modified")
+        val fileHash = Base64.getEncoder()
+            .encodeToString(
+                MessageDigest.getInstance("SHA-256")
+                    .digest(file.readBytes())
+            )
+        logger.info("Processing ${file.fileName} modified=$modified hash=$fileHash")
 
         val options = ParseOptions().apply {
             isResolve = true
@@ -79,18 +86,18 @@ class App(
 
         logger.info("Preparing page '$pageTitle'")
         val pageId = client.getOrCreatePage(targetPage, swagger.openAPI.info.title)
-        val generatedTime = client.getPageUpdatedDateTime(pageId)
-        if (generatedTime != null && generatedTime.toInstant().epochSecond >= modified.toInstant().epochSecond) {
-            logger.info("Page '$pageTitle' is up to date ($generatedTime)")
+        val pageHash = client.getPageHash(pageId)
+        if (pageHash == fileHash) {
+            logger.info("Page '$pageTitle' is up to date")
             return
         }
 
-        logger.info("Page '$pageTitle' not up to date ($generatedTime) -> Updating")
+        logger.info("Page '$pageTitle' not up to date '$pageHash' != '$fileHash'")
         client.deletePageContents(pageId, pageTitle)
         logger.info("Writing template to page '$pageTitle'")
         val blocks = client.writeTemplate(pageId, template)
         logger.info("Added ${blocks.size} blocks to page '$pageTitle'")
-        client.updatePage(pageId)
+        client.updatePageProperties(pageId, fileHash)
     }
 
 }
