@@ -85,6 +85,7 @@ class App(
             return
         }
 
+        logger.info("Page '$pageTitle' not up to date ($generatedTime) -> Updating")
         client.deletePageContents(pageId, pageTitle)
         logger.info("Writing template to page '$pageTitle'")
         val blocks = client.writeTemplate(pageId, template)
