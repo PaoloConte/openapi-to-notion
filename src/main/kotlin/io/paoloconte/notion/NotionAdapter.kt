@@ -61,7 +61,7 @@ class NotionAdapter(
     }
 
     fun updatePageProperties(pageId: String, hash: String) {
-        logger.info("Updating Page '$pageId'")
+        logger.info("Updating Page '$pageId' with hash $hash")
         return withRetry {
             client.updatePage(
                 pageId = pageId,
