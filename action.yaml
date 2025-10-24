@@ -29,7 +29,8 @@ runs:
 
     - name: Download JAR file
       run: |
-        curl -L -o app.jar https://github.com/PaoloConte/openapi-to-notion/releases/download/v2.0.2/app.jar
+        APP_VERSION=$(grep -oP '(?<=version = ")[^"]+' build.gradle.kts)
+        curl -L -o app.jar "https://github.com/PaoloConte/openapi-to-notion/releases/download/v$APP_VERSION/app.jar"
       shell: bash
 
     - name: Prepare Config File
